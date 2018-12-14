@@ -1,0 +1,52 @@
+body {
+
+}
+
+table {
+  border-collapse: collapse;
+}
+
+td {
+  width: 40px;
+  height: 40px;
+  border: 1px solid black;
+}
+
+.top {
+  border-top-width: 2px;
+}
+
+.bottom {
+  border-bottom-width: 2px;
+}
+
+.left {
+  border-left-width: 2px;
+}
+
+.right{
+  border-right-width: 2px;
+}
+
+input {
+  height: 100%;
+  width: 100%;
+  border: none;
+  outline: none;
+  padding: 0;
+  font-size: 30px;
+  text-align: center;
+}
+
+input:focus {
+  outline: 2px solid blue;
+}
+
+@keyframes warningAnimation {
+  from {outline-color: blue;}
+  to {outline-color: red;}
+}
+
+.warning {
+  animation: .2s 2 alternate warningAnimation;
+}
