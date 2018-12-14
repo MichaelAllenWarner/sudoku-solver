@@ -1,5 +1,92 @@
 function solve() {
-  console.log('solve!');
+  const cellObjArray = [];
+  for (let i = 1; i < 10; i++) {
+    for (let j = 1; j < 10; j++) {
+      const inputVal = +document.querySelector(`#row${i-1}col${j-1}input`).value;
+      cellObjArray.push({
+        row: i,
+        col: j,
+        box: (i <= 3 && j <= 3) ? 1
+        : (i <= 3 && j >= 4 && j <= 6) ? 2
+        : (i <= 3 && j >= 7) ? 3
+        : (i >= 4 && i <= 6 && j <= 3) ? 4
+        : (i >= 4 && i <= 6 && j >= 4 && j <= 6) ? 5
+        : (i >= 4 && i <= 6 && j >= 7) ? 6
+        : (i >= 7 && j <= 3) ? 7
+        : (i >= 7 && j >= 4 && j <= 6) ? 8
+        : 9,
+        val: (inputVal) ? inputVal : null,
+        possVals: (inputVal) ? [] : [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        selfUpdate() {
+          if (!this.val && this.possVals.length === 1) {
+            this.val = this.possVals[0];
+            this.possVals.pop();
+            document.querySelector(`#row${this.row-1}col${this.col-1}input`).value = this.val; // for testing
+          }
+        }
+      });
+    }
+  }
+  const groupObjArrays = {
+    rowObjArray: [],
+    colObjArray: [],
+    boxObjArray: []
+  }
+  function arrFiller(arr) {
+    for (let i = 1; i < 10; i++) {
+      arr.push({
+        num: i,
+        takenNums: []
+      });
+    }
+  }
+  arrFiller(groupObjArrays.rowObjArray);
+  arrFiller(groupObjArrays.colObjArray);
+  arrFiller(groupObjArrays.boxObjArray);
+
+  function makeBasicUpdates(cellObjArray, groupObjArrays) {
+    function calibrateCellAndGroupObjs(cellObjArray, groupObjArray, groupType) {
+      let anyChangesMadeHere = false;
+      groupObjArray.forEach(groupObj => {
+        cellObjArray.forEach(cellObj => {
+          if (cellObj[groupType] === groupObj.num) {
+            if (cellObj.val && !groupObj.takenNums.includes(cellObj.val)) {
+              groupObj.takenNums.push(cellObj.val);
+              anyChangesMadeHere = true;
+            }
+            if (!cellObj.val) {
+              groupObj.takenNums.forEach(takenNum => {
+                if (cellObj.possVals.includes(takenNum)) {
+                  const numIndex = cellObj.possVals.findIndex(possVal => possVal === takenNum);
+                  cellObj.possVals.splice(numIndex, 1);
+                  anyChangesMadeHere = true;
+                }
+              });
+            }
+          }
+        });
+      });
+      return anyChangesMadeHere;
+    }
+
+    let noChangesMade;
+    do {
+      noChangesMade = false;
+      const cellAndRowCalibrationsMade = calibrateCellAndGroupObjs(cellObjArray, groupObjArrays.rowObjArray, 'row');
+      const cellAndColCalibrationsMade = calibrateCellAndGroupObjs(cellObjArray, groupObjArrays.colObjArray, 'col');
+      const cellAndBoxCalibrationsMade = calibrateCellAndGroupObjs(cellObjArray, groupObjArrays.boxObjArray, 'box');
+      cellObjArray.forEach(cellObj => {
+        cellObj.selfUpdate();
+      });
+      if (cellAndRowCalibrationsMade || cellAndColCalibrationsMade || cellAndBoxCalibrationsMade) {
+        noChangesMade = true;
+      }
+    } while (noChangesMade);
+  }
+
+  makeBasicUpdates(cellObjArray, groupObjArrays);
+  console.log(cellObjArray);
+  console.log(groupObjArrays);
 }
 
 function setupBoard() {
