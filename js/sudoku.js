@@ -74,14 +74,14 @@ function setupBoard() {
           if (i !== 0) {
             document.querySelector(`#row${i-1}col${j}input`).focus();
           } else {
-            document.querySelector(`#row${8}col${j}input`).focus();
+            document.querySelector(`#row8col${j}input`).focus();
           }
         }
         if (event.key === 'ArrowDown' || event.key === 'Down') {
           if (i !== 8) {
             document.querySelector(`#row${i+1}col${j}input`).focus();
           } else {
-            document.querySelector(`#row${0}col${j}input`).focus();
+            document.querySelector(`#row0col${j}input`).focus();
           }
         }
       });
