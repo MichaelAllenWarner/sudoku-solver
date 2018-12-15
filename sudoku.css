@@ -47,6 +47,10 @@ input:focus {
   outline: 2px solid dodgerblue;
 }
 
+.hidden {
+  display: none;
+}
+
 @keyframes warningAnimation {
   from {outline-color: dodgerblue;}
   to {outline-color: crimson;}
@@ -56,6 +60,6 @@ input:focus {
   animation: .2s 2 alternate warningAnimation;
 }
 
-#buttons {
+#buttons, #unsolvable {
   text-align: center;
 }

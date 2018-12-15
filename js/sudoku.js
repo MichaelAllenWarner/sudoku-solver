@@ -1,4 +1,5 @@
 function solve() {
+  document.querySelector('#unsolvable').classList.add('hidden');
   const cellObjArray = [];
   for (let i = 1; i < 10; i++) {
     for (let j = 1; j < 10; j++) {
@@ -17,11 +18,19 @@ function solve() {
         : 9,
         val: (inputVal) ? inputVal : null,
         possVals: (inputVal) ? [] : [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        rowTakenNumsContributor: false,
+        colTakenNumsContributor: false,
+        boxTakenNumsContributor: false,
         selfUpdate() {
           if (!this.val && this.possVals.length === 1) {
             this.val = this.possVals[0];
             this.possVals.pop();
             document.querySelector(`#row${this.row-1}col${this.col-1}input`).value = this.val; // for testing
+          }
+        },
+        checkForNoPossValsLeft() {
+          if (!this.val && this.possVals.length === 0) {
+            return true;
           }
         }
       });
@@ -36,7 +45,17 @@ function solve() {
     for (let i = 1; i < 10; i++) {
       arr.push({
         num: i,
-        takenNums: []
+        takenNums: [],
+        checkForDuplicates() {
+          const nonDuplicates = [];
+          for (let j = 0; j < this.takenNums.length; j++) {
+            if (nonDuplicates.includes(this.takenNums[j])) {
+              return true;
+            } else {
+              nonDuplicates.push(this.takenNums[j]);
+            }
+          }
+        }
       });
     }
   }
@@ -50,8 +69,9 @@ function solve() {
       groupObjArray.forEach(groupObj => {
         cellObjArray.forEach(cellObj => {
           if (cellObj[groupType] === groupObj.num) {
-            if (cellObj.val && !groupObj.takenNums.includes(cellObj.val)) {
+            if (cellObj.val && !cellObj[`${groupType}TakenNumsContributor`]) {
               groupObj.takenNums.push(cellObj.val);
+              cellObj[`${groupType}TakenNumsContributor`] = true;
               anyChangesMadeHere = true;
             }
             if (!cellObj.val) {
@@ -69,22 +89,49 @@ function solve() {
       return anyChangesMadeHere;
     }
 
-    let noChangesMade;
+    function groupContradictionChecker(groupObjArray) {
+      for (let i = 0; i < groupObjArray.length; i++) {
+        if (groupObjArray[i].checkForDuplicates()) {
+          return true;
+        }
+      }
+    }
+
+    function cellContradictionChecker(cellObjArray) {
+      for (let i = 0; i < cellObjArray.length; i++) {
+        if (cellObjArray[i].checkForNoPossValsLeft()) {
+          return true;
+        }
+      }
+    }
+
+    let anyChangesMade;
     do {
-      noChangesMade = false;
+      anyChangesMade = false;
       const cellAndRowCalibrationsMade = calibrateCellAndGroupObjs(cellObjArray, groupObjArrays.rowObjArray, 'row');
       const cellAndColCalibrationsMade = calibrateCellAndGroupObjs(cellObjArray, groupObjArrays.colObjArray, 'col');
       const cellAndBoxCalibrationsMade = calibrateCellAndGroupObjs(cellObjArray, groupObjArrays.boxObjArray, 'box');
       cellObjArray.forEach(cellObj => {
         cellObj.selfUpdate();
       });
-      if (cellAndRowCalibrationsMade || cellAndColCalibrationsMade || cellAndBoxCalibrationsMade) {
-        noChangesMade = true;
+      const rowContradictions = groupContradictionChecker(groupObjArrays.rowObjArray);
+      const colContradictions = groupContradictionChecker(groupObjArrays.colObjArray);
+      const boxContradictions = groupContradictionChecker(groupObjArrays.boxObjArray);
+      const cellContradictions = cellContradictionChecker(cellObjArray);
+      if (rowContradictions || colContradictions || boxContradictions || cellContradictions) {
+        return true;
       }
-    } while (noChangesMade);
+      if (cellAndRowCalibrationsMade || cellAndColCalibrationsMade || cellAndBoxCalibrationsMade) {
+        anyChangesMade = true;
+      }
+    } while (anyChangesMade);
   }
 
-  makeBasicUpdates(cellObjArray, groupObjArrays);
+  if (makeBasicUpdates(cellObjArray, groupObjArrays)) {
+    document.querySelector('#unsolvable').classList.remove('hidden');
+    return;
+  }
+
   console.log(cellObjArray);
   console.log(groupObjArrays);
 }
@@ -185,6 +232,7 @@ function setupClearButton() {
     });
     setupBoard();
     setupBadInputWarning();
+    document.querySelector('#unsolvable').classList.add('hidden');
   });
 }
 
