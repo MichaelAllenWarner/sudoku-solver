@@ -2,12 +2,12 @@ function solve() {
   document.querySelector('#unsolvable').classList.add('hidden');
 
   class Cell {
-    constructor(row, col, box, inputVal) {
+    constructor(row, col, box, val) {
       this.row = row;
       this.col = col;
       this.box = box;
-      this.val = (inputVal) ? inputVal : null;
-      this.possVals = (inputVal) ? [] : [1, 2, 3, 4, 5, 6, 7, 8, 9];
+      this.val = (val) ? val : null;
+      this.possVals = (val) ? [] : [1, 2, 3, 4, 5, 6, 7, 8, 9];
       this.rowTakenNumsContributor = false;
       this.colTakenNumsContributor = false;
       this.boxTakenNumsContributor = false;
@@ -58,8 +58,8 @@ function solve() {
       : (i >= 6 && j <= 2) ? 7
       : (i >= 6 && j >= 3 && j <= 5) ? 8
       : 9;
-      const inputVal = +document.querySelector(`#row${i}col${j}input`).value;
-      cellObjArray.push(new Cell(row, col, box, inputVal));
+      const val = +document.querySelector(`#row${i}col${j}input`).value;
+      cellObjArray.push(new Cell(row, col, box, val));
     }
   }
 
