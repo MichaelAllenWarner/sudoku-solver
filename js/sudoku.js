@@ -1,77 +1,84 @@
 function solve() {
   document.querySelector('#unsolvable').classList.add('hidden');
-  const cellObjArray = [];
-  for (let i = 1; i < 10; i++) {
-    for (let j = 1; j < 10; j++) {
-      const inputVal = +document.querySelector(`#row${i-1}col${j-1}input`).value;
-      cellObjArray.push({
-        row: i,
-        col: j,
-        box: (i <= 3 && j <= 3) ? 1
-        : (i <= 3 && j >= 4 && j <= 6) ? 2
-        : (i <= 3 && j >= 7) ? 3
-        : (i >= 4 && i <= 6 && j <= 3) ? 4
-        : (i >= 4 && i <= 6 && j >= 4 && j <= 6) ? 5
-        : (i >= 4 && i <= 6 && j >= 7) ? 6
-        : (i >= 7 && j <= 3) ? 7
-        : (i >= 7 && j >= 4 && j <= 6) ? 8
-        : 9,
-        val: (inputVal) ? inputVal : null,
-        possVals: (inputVal) ? [] : [1, 2, 3, 4, 5, 6, 7, 8, 9],
-        rowTakenNumsContributor: false,
-        colTakenNumsContributor: false,
-        boxTakenNumsContributor: false,
-        selfUpdate() {
-          if (!this.val && this.possVals.length === 1) {
-            this.val = this.possVals[0];
-            this.possVals.pop();
-            document.querySelector(`#row${this.row-1}col${this.col-1}input`).value = this.val; // for testing
-          }
-        },
-        checkForNoPossValsLeft() {
-          if (!this.val && this.possVals.length === 0) {
-            return true;
-          }
-        }
-      });
-    }
-  }
-  const groupObjArrays = {
-    rowObjArray: [],
-    colObjArray: [],
-    boxObjArray: []
-  }
-  function arrFiller(arr) {
-    for (let i = 1; i < 10; i++) {
-      arr.push({
-        num: i,
-        takenNums: [],
-        checkForDuplicates() {
-          const nonDuplicates = [];
-          for (let j = 0; j < this.takenNums.length; j++) {
-            if (nonDuplicates.includes(this.takenNums[j])) {
-              return true;
-            } else {
-              nonDuplicates.push(this.takenNums[j]);
-            }
-          }
-        }
-      });
-    }
-  }
-  arrFiller(groupObjArrays.rowObjArray);
-  arrFiller(groupObjArrays.colObjArray);
-  arrFiller(groupObjArrays.boxObjArray);
 
-  function makeBasicUpdates(cellObjArray, groupObjArrays) {
-    function calibrateCellAndGroupObjs(cellObjArray, groupObjArray, groupType) {
+  class Cell {
+    constructor(row, col, box, inputVal) {
+      this.row = row;
+      this.col = col;
+      this.box = box;
+      this.val = (inputVal) ? inputVal : null;
+      this.possVals = (inputVal) ? [] : [1, 2, 3, 4, 5, 6, 7, 8, 9];
+      this.rowTakenNumsContributor = false;
+      this.colTakenNumsContributor = false;
+      this.boxTakenNumsContributor = false;
+    }
+    selfUpdate() {
+      if (!this.val && this.possVals.length === 1) {
+        this.val = this.possVals[0];
+        this.possVals.pop();
+        document.querySelector(`#row${this.row-1}col${this.col-1}input`).value = this.val; // for testing
+      }
+    }
+    checkForNoPossValsLeft() {
+      if (!this.val && this.possVals.length === 0) {
+        return true;
+      }
+    }
+  }
+
+  class Group {
+    constructor(groupType, num) {
+      this.groupType = groupType;
+      this.num = num;
+      this.takenNums = [];
+    }
+    checkForDuplicates() {
+      const nonDuplicates = [];
+      for (let i = 0; i < this.takenNums.length; i++) {
+        if (nonDuplicates.includes(this.takenNums[i])) {
+          return true;
+        } else {
+          nonDuplicates.push(this.takenNums[i]);
+        }
+      }
+    }
+  }
+
+  const cellObjArray = [];
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
+      const row = i + 1;
+      const col = j + 1;
+      const box = (i <= 2 && j <= 2) ? 1
+      : (i <= 2 && j >= 3 && j <= 5) ? 2
+      : (i <= 2 && j >= 6) ? 3
+      : (i >= 3 && i <= 5 && j <= 2) ? 4
+      : (i >= 3 && i <= 5 && j >= 3 && j <= 5) ? 5
+      : (i >= 3 && i <= 5 && j >= 6) ? 6
+      : (i >= 6 && j <= 2) ? 7
+      : (i >= 6 && j >= 3 && j <= 5) ? 8
+      : 9;
+      const inputVal = +document.querySelector(`#row${i}col${j}input`).value;
+      cellObjArray.push(new Cell(row, col, box, inputVal));
+    }
+  }
+
+  const groupObjArray = [];
+  for (let num = 1; num < 10; num++) {
+    groupObjArray.push(new Group('row', num));
+    groupObjArray.push(new Group('col', num));
+    groupObjArray.push(new Group('box', num));
+  }
+
+  function makeBasicUpdates(cellObjArray, groupObjArray) {
+    function calibrateCellAndGroupObjs(cellObjArray, groupObjArray) {
       let anyChangesMadeHere = false;
       groupObjArray.forEach(groupObj => {
         cellObjArray.forEach(cellObj => {
-          if (cellObj[groupType] === groupObj.num) {
-            if (cellObj.val && !cellObj[`${groupType}TakenNumsContributor`]) {
+          if (cellObj[groupObj.groupType] === groupObj.num) {
+            if (cellObj.val && !cellObj[`${groupObj.groupType}TakenNumsContributor`]) {
               groupObj.takenNums.push(cellObj.val);
-              cellObj[`${groupType}TakenNumsContributor`] = true;
+              cellObj[`${groupObj.groupType}TakenNumsContributor`] = true;
               anyChangesMadeHere = true;
             }
             if (!cellObj.val) {
@@ -107,33 +114,23 @@ function solve() {
 
     let anyChangesMade;
     do {
-      anyChangesMade = false;
-      const cellAndRowCalibrationsMade = calibrateCellAndGroupObjs(cellObjArray, groupObjArrays.rowObjArray, 'row');
-      const cellAndColCalibrationsMade = calibrateCellAndGroupObjs(cellObjArray, groupObjArrays.colObjArray, 'col');
-      const cellAndBoxCalibrationsMade = calibrateCellAndGroupObjs(cellObjArray, groupObjArrays.boxObjArray, 'box');
+      anyChangesMade = calibrateCellAndGroupObjs(cellObjArray, groupObjArray);
       cellObjArray.forEach(cellObj => {
         cellObj.selfUpdate();
       });
-      const rowContradictions = groupContradictionChecker(groupObjArrays.rowObjArray);
-      const colContradictions = groupContradictionChecker(groupObjArrays.colObjArray);
-      const boxContradictions = groupContradictionChecker(groupObjArrays.boxObjArray);
-      const cellContradictions = cellContradictionChecker(cellObjArray);
-      if (rowContradictions || colContradictions || boxContradictions || cellContradictions) {
+      if (groupContradictionChecker(groupObjArray) || cellContradictionChecker(cellObjArray)) {
         return true;
-      }
-      if (cellAndRowCalibrationsMade || cellAndColCalibrationsMade || cellAndBoxCalibrationsMade) {
-        anyChangesMade = true;
       }
     } while (anyChangesMade);
   }
 
-  if (makeBasicUpdates(cellObjArray, groupObjArrays)) {
+  if (makeBasicUpdates(cellObjArray, groupObjArray)) {
     document.querySelector('#unsolvable').classList.remove('hidden');
     return;
   }
 
   console.log(cellObjArray);
-  console.log(groupObjArrays);
+  console.log(groupObjArray);
 }
 
 function setupBoard() {
