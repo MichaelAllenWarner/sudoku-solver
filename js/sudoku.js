@@ -44,6 +44,10 @@ function solve() {
     }
   }
 
+  class Row extends Group {}
+  class Col extends Group {}
+  class Box extends Group {}
+
   const cellObjArray = [];
   for (let i = 0; i < 9; i++) {
     for (let j = 0; j < 9; j++) {
@@ -65,14 +69,17 @@ function solve() {
 
   const groupObjArray = [];
   for (let num = 1; num < 10; num++) {
-    groupObjArray.push(new Group('row', num));
-    groupObjArray.push(new Group('col', num));
-    groupObjArray.push(new Group('box', num));
+    groupObjArray.push(new Row('row', num));
+    groupObjArray.push(new Col('col', num));
+    groupObjArray.push(new Box('box', num));
   }
 
-  function makeBasicUpdates(cellObjArray, groupObjArray) {
-    function calibrateCellAndGroupObjs(cellObjArray, groupObjArray) {
+  function solveAndCheckForInvalidPuzzle(cellObjArray, groupObjArray) {
+
+    function addValsToTakenNums(cellObjArray, groupObjArray) {
+
       let anyChangesMadeHere = false;
+
       groupObjArray.forEach(groupObj => {
         cellObjArray.forEach(cellObj => {
           if (cellObj[groupObj.groupType] === groupObj.num) {
@@ -81,6 +88,20 @@ function solve() {
               cellObj[`${groupObj.groupType}TakenNumsContributor`] = true;
               anyChangesMadeHere = true;
             }
+          }
+        });
+      });
+
+      return anyChangesMadeHere;
+    }
+
+    function removeTakenNumsFromPossVals(cellObjArray, groupObjArray) {
+
+      let anyChangesMadeHere = false;
+
+      groupObjArray.forEach(groupObj => {
+        cellObjArray.forEach(cellObj => {
+          if (cellObj[groupObj.groupType] === groupObj.num) {
             if (!cellObj.val) {
               groupObj.takenNums.forEach(takenNum => {
                 if (cellObj.possVals.includes(takenNum)) {
@@ -93,7 +114,111 @@ function solve() {
           }
         });
       });
+
       return anyChangesMadeHere;
+    }
+
+    function uniquePossValInBox(cellObjArray, groupObjArray) {
+
+      let anyChangesMadeHere = false;
+
+      const boxObjArray = groupObjArray.filter(obj => obj instanceof Box);
+      boxObjArray.forEach(boxObj => {
+        const cellsInThisBox = [];
+        cellObjArray.forEach(cellObj => {
+          if (cellObj.box === boxObj.num) {
+            cellsInThisBox.push(cellObj);
+          }
+        });
+        const candidateVals = [];
+        const ruledOutVals = [];
+        for (let i = 1; i < 10; i++) {
+          cellsInThisBox.forEach(cellObj => {
+            if (cellObj.possVals.includes(i) && !candidateVals.includes(i) && !ruledOutVals.includes(i)) {
+              candidateVals.push(i);
+            } else if (cellObj.possVals.includes(i) && candidateVals.includes(i) && !ruledOutVals.includes(i)) {
+              const valIndex = candidateVals.findIndex(candidate => candidate === i);
+              candidateVals.splice(valIndex, 1);
+              ruledOutVals.push(i);
+            }
+          });
+        }
+        const uniqueVals = candidateVals;
+        uniqueVals.forEach(uniqueVal => {
+          for (let i = 0; i < 9; i++) {
+            if (cellsInThisBox[i].possVals.includes(uniqueVal)) {
+              cellsInThisBox[i].possVals = [uniqueVal];
+              // cellsInThisBox[i].selfUpdate(); // maybe don't run this yet
+              i = 9;
+              anyChangesMadeHere = true;
+            }
+          }
+        });
+      });
+
+      return anyChangesMadeHere
+    }
+
+    function removePossValIfMustBeInDifferentBox(cellObjArray, groupObjArray) {
+
+      let anyChangesMadeHere = false;
+
+      const boxObjArray = groupObjArray.filter(obj => obj instanceof Box);
+      boxObjArray.forEach(boxObj => {
+        const possValObjects = [];
+        for (let i = 1; i < 10; i++) {
+          possValObjects.push({
+            number: i,
+            rowsWithNumberAsPossVal: [],
+            colsWithNumberAsPossVal: []
+          });
+        }
+        cellObjArray.forEach(cellObj => {
+          if (cellObj.box === boxObj.num) {
+            for (let i = 1; i < 10; i++) {
+              if (cellObj.possVals.includes(i)) {
+                if (!possValObjects[i-1].rowsWithNumberAsPossVal.includes(cellObj.row)) {
+                  possValObjects[i-1].rowsWithNumberAsPossVal.push(cellObj.row);
+                }
+                if (!possValObjects[i-1].colsWithNumberAsPossVal.includes(cellObj.col)) {
+                  possValObjects[i-1].colsWithNumberAsPossVal.push(cellObj.col);
+                }
+              }
+            }
+          }
+        });
+        possValObjects.forEach((possValObject, possValObjectIndex) => {
+          const valToRemove = possValObjectIndex + 1;
+          if (possValObject.rowsWithNumberAsPossVal.length === 1) {
+            const cellsInSameRowButDifferentBox = cellObjArray.filter(cellObj => (cellObj.row === possValObject.rowsWithNumberAsPossVal[0] && cellObj.box !== boxObj.num));
+            cellsInSameRowButDifferentBox.forEach(cellObj => {
+              if (cellObj.possVals.includes(valToRemove)) {
+                const valIndex = cellObj.possVals.findIndex(possVal => possVal === valToRemove);
+                cellObj.possVals.splice(valIndex, 1);
+                anyChangesMadeHere = true;
+              }
+            });
+          }
+          if (possValObject.colsWithNumberAsPossVal.length === 1) {
+            const cellsInSameColButDifferentBox = cellObjArray.filter(cellObj => (cellObj.col === possValObject.colsWithNumberAsPossVal[0] && cellObj.box !== boxObj.num));
+            cellsInSameColButDifferentBox.forEach(cellObj => {
+              if (cellObj.possVals.includes(valToRemove)) {
+                const valIndex = cellObj.possVals.findIndex(possVal => possVal === valToRemove);
+                cellObj.possVals.splice(valIndex, 1);
+                anyChangesMadeHere = true;
+              }
+            });
+          }
+        });
+      });
+
+      return anyChangesMadeHere;
+    }
+
+    function runCellSelfUpdates(cellObjArray) { // save for end?
+      cellObjArray.forEach(cellObj => {
+        cellObj.selfUpdate();
+      });
     }
 
     function groupContradictionChecker(groupObjArray) {
@@ -114,23 +239,29 @@ function solve() {
 
     let anyChangesMade;
     do {
-      anyChangesMade = calibrateCellAndGroupObjs(cellObjArray, groupObjArray);
-      cellObjArray.forEach(cellObj => {
-        cellObj.selfUpdate();
-      });
-      if (groupContradictionChecker(groupObjArray) || cellContradictionChecker(cellObjArray)) {
-        return true;
+      const changes1 = addValsToTakenNums(cellObjArray, groupObjArray);
+      const changes2 = removeTakenNumsFromPossVals(cellObjArray, groupObjArray);
+      const changes3 = uniquePossValInBox(cellObjArray, groupObjArray);
+      const changes4 = removePossValIfMustBeInDifferentBox(cellObjArray, groupObjArray);
+      if (changes1 || changes2 || changes3 || changes4) {
+        anyChangesMade = true;
+        runCellSelfUpdates(cellObjArray);
+      } else {
+        anyChangesMade = false;
       }
     } while (anyChangesMade);
+
+
+    if (groupContradictionChecker(groupObjArray) || cellContradictionChecker(cellObjArray)) {
+      return true;
+    }
   }
 
-  if (makeBasicUpdates(cellObjArray, groupObjArray)) {
+  if (solveAndCheckForInvalidPuzzle(cellObjArray, groupObjArray)) {
     document.querySelector('#unsolvable').classList.remove('hidden');
     return;
   }
 
-  console.log(cellObjArray);
-  console.log(groupObjArray);
 }
 
 function setupBoard() {
