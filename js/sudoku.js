@@ -17,6 +17,9 @@ function solve() {
         this.val = this.possVals[0];
         this.possVals.pop();
         document.querySelector(`#row${this.row-1}col${this.col-1}input`).value = this.val; // for testing
+        document.querySelector(`#row${this.row-1}col${this.col-1}input`).classList.remove('possVals');
+        document.querySelector(`#row${this.row-1}col${this.col-1}input`).classList.add('generated');
+
       }
     }
     checkForNoPossValsLeft() {
@@ -80,17 +83,29 @@ function solve() {
 
       let anyChangesMadeHere = false;
 
+      const pushesToMake = [];
+
       groupObjArray.forEach(groupObj => {
         cellObjArray.forEach(cellObj => {
           if (cellObj[groupObj.groupType] === groupObj.num) {
             if (cellObj.val && !cellObj[`${groupObj.groupType}TakenNumsContributor`]) {
-              groupObj.takenNums.push(cellObj.val);
-              cellObj[`${groupObj.groupType}TakenNumsContributor`] = true;
-              anyChangesMadeHere = true;
+              pushesToMake.push([groupObj, cellObj]);
             }
           }
         });
       });
+
+      if (pushesToMake.length > 0) {
+        console.log('Pushes to make: ');
+        console.log(pushesToMake);
+        pushesToMake.forEach(groupObjAndCellObjPair => {
+          const groupObj = groupObjAndCellObjPair[0];
+          const cellObj = groupObjAndCellObjPair[1];
+          groupObj.takenNums.push(cellObj.val);
+          cellObj[`${groupObj.groupType}TakenNumsContributor`] = true;
+        });
+        anyChangesMadeHere = true;
+      }
 
       return anyChangesMadeHere;
     }
@@ -99,41 +114,51 @@ function solve() {
 
       let anyChangesMadeHere = false;
 
+      const splicesToMake = [];
+
       groupObjArray.forEach(groupObj => {
         cellObjArray.forEach(cellObj => {
           if (cellObj[groupObj.groupType] === groupObj.num) {
             if (!cellObj.val) {
               groupObj.takenNums.forEach(takenNum => {
                 if (cellObj.possVals.includes(takenNum)) {
-                  const numIndex = cellObj.possVals.findIndex(possVal => possVal === takenNum);
-                  cellObj.possVals.splice(numIndex, 1);
-                  anyChangesMadeHere = true;
+                  splicesToMake.push([cellObj, takenNum]);
                 }
               });
             }
           }
         });
       });
+      if (splicesToMake.length > 0) {
+        splicesToMake.forEach(cellObjAndDigitPair => {
+          const cellObj = cellObjAndDigitPair[0];
+          const digit = cellObjAndDigitPair[1];
+          const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
+          if (indexToSplice !== -1) {
+            cellObj.possVals.splice(indexToSplice, 1);
+          }
+        });
+        anyChangesMadeHere = true;
+      }
 
       return anyChangesMadeHere;
     }
 
-    function uniquePossValInBox(cellObjArray, groupObjArray) {
+    function uniquePossValInGroup(cellObjArray, groupObjArray) {
 
       let anyChangesMadeHere = false;
 
-      const boxObjArray = groupObjArray.filter(obj => obj instanceof Box);
-      boxObjArray.forEach(boxObj => {
-        const cellsInThisBox = [];
+      groupObjArray.forEach(groupObj => {
+        const cellsInThisGroup = [];
         cellObjArray.forEach(cellObj => {
-          if (cellObj.box === boxObj.num) {
-            cellsInThisBox.push(cellObj);
+          if (cellObj[groupObj.groupType] === groupObj.num) {
+            cellsInThisGroup.push(cellObj);
           }
         });
         const candidateVals = [];
         const ruledOutVals = [];
         for (let i = 1; i < 10; i++) {
-          cellsInThisBox.forEach(cellObj => {
+          cellsInThisGroup.forEach(cellObj => {
             if (cellObj.possVals.includes(i) && !candidateVals.includes(i) && !ruledOutVals.includes(i)) {
               candidateVals.push(i);
             } else if (cellObj.possVals.includes(i) && candidateVals.includes(i) && !ruledOutVals.includes(i)) {
@@ -146,9 +171,8 @@ function solve() {
         const uniqueVals = candidateVals;
         uniqueVals.forEach(uniqueVal => {
           for (let i = 0; i < 9; i++) {
-            if (cellsInThisBox[i].possVals.includes(uniqueVal)) {
-              cellsInThisBox[i].possVals = [uniqueVal];
-              // cellsInThisBox[i].selfUpdate(); // maybe don't run this yet
+            if (cellsInThisGroup[i].possVals.includes(uniqueVal)) {
+              cellsInThisGroup[i].possVals = [uniqueVal];
               i = 9;
               anyChangesMadeHere = true;
             }
@@ -159,7 +183,7 @@ function solve() {
       return anyChangesMadeHere
     }
 
-    function removePossValIfMustBeInDifferentBox(cellObjArray, groupObjArray) {
+    function removePossValIfMustBeInDifferentKnownBox(cellObjArray, groupObjArray) {
 
       let anyChangesMadeHere = false;
 
@@ -215,7 +239,190 @@ function solve() {
       return anyChangesMadeHere;
     }
 
-    function runCellSelfUpdates(cellObjArray) { // save for end?
+    function removePossValIfMustBeInPerfectSubset(cellObjArray, groupObjArray) {
+
+      let anyChangesMadeHere = false;
+
+      const splicesToMake = [];
+
+      groupObjArray.forEach(groupObj => {
+        const possValsWithCount = [];
+        const possValsWithoutCount = [];
+        cellObjArray.forEach(cellObj => {
+          if (cellObj[groupObj.groupType] === groupObj.num && cellObj.possVals.length > 1) {
+            if (possValsWithCount.length === 0) {
+              possValsWithCount.push([cellObj.possVals, 1]);
+              possValsWithoutCount.push(cellObj.possVals);
+            } else {
+              for (let i = 0; i < possValsWithCount.length; i++) {
+                if (possValsWithCount[i][0].join() === cellObj.possVals.join()) {
+                  possValsWithCount[i][1]++;
+                  break;
+                }
+                if (i === possValsWithCount.length - 1) {
+                  possValsWithCount.push([cellObj.possVals, 1]);
+                  possValsWithoutCount.push(cellObj.possVals);
+                  break;
+                }
+              }
+            }
+          }
+        });
+        const candidateSubsetPossVals = [];
+        possValsWithCount.forEach(possValsArrWithCount => {
+          if (possValsArrWithCount[0].length === possValsArrWithCount[1]) {
+            candidateSubsetPossVals.push(possValsArrWithCount[0]);
+          }
+        });
+        candidateSubsetPossVals.forEach(candidatePossVals => {
+          possValsWithoutCount.forEach(potentialContainerPossVals => {
+            if (potentialContainerPossVals.length > candidatePossVals.length && candidatePossVals.some(el => potentialContainerPossVals.includes(el))) {
+              cellObjArray.forEach(cellObj => {
+                if (cellObj[groupObj.groupType] === groupObj.num && cellObj.possVals.join() === potentialContainerPossVals.join()) {
+                  candidatePossVals.forEach(possValToRemove => {
+                    if (potentialContainerPossVals.includes(possValToRemove)) {
+                      splicesToMake.push([cellObj, possValToRemove]);
+                    }
+                  });
+                }
+              });
+            }
+          });
+        });
+      });
+      if (splicesToMake.length > 0) {
+        splicesToMake.forEach(cellObjAndDigitPair => {
+          const cellObj = cellObjAndDigitPair[0];
+          const digit = cellObjAndDigitPair[1];
+          const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
+          if (indexToSplice !== -1) {
+            cellObj.possVals.splice(indexToSplice, 1);
+          }
+        });
+        anyChangesMadeHere = true;
+      }
+
+      return anyChangesMadeHere;
+    }
+
+    function removePossValIfMustBeInDifferentUnknownBox(cellObjArray, groupObjArray) {
+
+      let anyChangesMadeHere = false;
+
+      const splicesToMake = [];
+
+      const boxObjArray = groupObjArray.filter(obj => obj instanceof Box);
+      for (let digit = 1; digit < 10; digit++) {
+        boxObjArray.forEach(boxObj => {
+          if (!boxObj.takenNums.includes(digit)) {
+            const possRowsAndCols = {
+              rowsWithDigitAsPossVal: [],
+              colsWithDigitAsPossVal: []
+            }
+            cellObjArray.forEach(cellObj => {
+              if (cellObj.box === boxObj.num) {
+                if (cellObj.possVals.includes(digit)) {
+                  if (!possRowsAndCols.rowsWithDigitAsPossVal.includes(cellObj.row)) {
+                    possRowsAndCols.rowsWithDigitAsPossVal.push(cellObj.row);
+                  }
+                  if (!possRowsAndCols.colsWithDigitAsPossVal.includes(cellObj.col)) {
+                    possRowsAndCols.colsWithDigitAsPossVal.push(cellObj.col);
+                  }
+                }
+              }
+            });
+            if (possRowsAndCols.rowsWithDigitAsPossVal.length === 2) {
+              const otherTwoBoxObjs = [];
+              boxObjArray.forEach(candidateBoxObj => {
+                if (boxObj.num < 4 && candidateBoxObj.num < 4 && candidateBoxObj.num !== boxObj.num) {
+                  otherTwoBoxObjs.push(candidateBoxObj);
+                }
+                if (boxObj.num > 3 && boxObj.num < 7 && candidateBoxObj.num > 3 && candidateBoxObj.num < 7 && candidateBoxObj.num !== boxObj.num) {
+                  otherTwoBoxObjs.push(candidateBoxObj);
+                }
+                if (boxObj.num > 6 && candidateBoxObj.num > 6 && candidateBoxObj.num !== boxObj.num) {
+                  otherTwoBoxObjs.push(candidateBoxObj);
+                }
+              });
+              otherTwoBoxObjs.forEach(secondaryBoxObj => {
+                const tertiaryBoxObj = (secondaryBoxObj.num === otherTwoBoxObjs[0].num) ? otherTwoBoxObjs[1] : otherTwoBoxObjs[0];
+                if (!secondaryBoxObj.takenNums.includes(digit) && !tertiaryBoxObj.takenNums.includes(digit)) {
+                  const secondaryPossRows = [];
+                  cellObjArray.forEach(cellObj => {
+                    if (cellObj.box === secondaryBoxObj.num) {
+                      if (cellObj.possVals.includes(digit)) {
+                        if (!secondaryPossRows.includes(cellObj.row)) {
+                          secondaryPossRows.push(cellObj.row);
+                        }
+                      }
+                    }
+                  });
+                  if (secondaryPossRows.sort().join() === possRowsAndCols.rowsWithDigitAsPossVal.sort().join()) {
+                    cellObjArray.forEach(cellObj => {
+                      if (cellObj.box === tertiaryBoxObj.num && secondaryPossRows.includes(cellObj.row) && cellObj.possVals.includes(digit)) {
+                        splicesToMake.push([cellObj, digit]);
+                      }
+                    });
+                  }
+                }
+              });
+            }
+            if (possRowsAndCols.colsWithDigitAsPossVal.length === 2) {
+              const otherTwoBoxObjs = [];
+              boxObjArray.forEach(candidateBoxObj => {
+                if ((boxObj.num === 1 || boxObj.num === 4 || boxObj.num === 7) && (candidateBoxObj.num === 1 || candidateBoxObj.num === 4 || candidateBoxObj.num === 7) && candidateBoxObj.num !== boxObj.num) {
+                  otherTwoBoxObjs.push(candidateBoxObj);
+                }
+                if ((boxObj.num === 2 || boxObj.num === 5 || boxObj.num === 8) && (candidateBoxObj.num === 2 || candidateBoxObj.num === 5 || candidateBoxObj.num === 8) && candidateBoxObj.num !== boxObj.num) {
+                  otherTwoBoxObjs.push(candidateBoxObj);
+                }
+                if ((boxObj.num === 3 || boxObj.num === 6 || boxObj.num === 9) && (candidateBoxObj.num === 3 || candidateBoxObj.num === 6 || candidateBoxObj.num === 9) && candidateBoxObj.num !== boxObj.num) {
+                  otherTwoBoxObjs.push(candidateBoxObj);
+                }
+              });
+              otherTwoBoxObjs.forEach(secondaryBoxObj => {
+                const tertiaryBoxObj = (secondaryBoxObj.num === otherTwoBoxObjs[0].num) ? otherTwoBoxObjs[1] : otherTwoBoxObjs[0];
+                if (!secondaryBoxObj.takenNums.includes(digit) && !tertiaryBoxObj.takenNums.includes(digit)) {
+                  const secondaryPossCols = [];
+                  cellObjArray.forEach(cellObj => {
+                    if (cellObj.box === secondaryBoxObj.num) {
+                      if (cellObj.possVals.includes(digit)) {
+                        if (!secondaryPossCols.includes(cellObj.col)) {
+                          secondaryPossCols.push(cellObj.col);
+                        }
+                      }
+                    }
+                  });
+                  if (secondaryPossCols.sort().join() === possRowsAndCols.colsWithDigitAsPossVal.sort().join()) {
+                    cellObjArray.forEach(cellObj => {
+                      if (cellObj.box === tertiaryBoxObj.num && secondaryPossCols.includes(cellObj.col) && cellObj.possVals.includes(digit)) {
+                        splicesToMake.push([cellObj, digit]);
+                      }
+                    });
+                  }
+                }
+              });
+            }
+          }
+        });
+      }
+      if (splicesToMake.length > 0) {
+        console.log(splicesToMake);
+        splicesToMake.forEach(cellObjAndDigitPair => {
+          const cellObj = cellObjAndDigitPair[0];
+          const digit = cellObjAndDigitPair[1];
+          const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
+          if (indexToSplice !== -1) {
+            cellObj.possVals.splice(indexToSplice, 1);
+          }
+        });
+        anyChangesMadeHere = true;
+      }
+
+      return anyChangesMadeHere;
+    }
+
+    function runCellSelfUpdates(cellObjArray) {
       cellObjArray.forEach(cellObj => {
         cellObj.selfUpdate();
       });
@@ -241,9 +448,11 @@ function solve() {
     do {
       const changes1 = addValsToTakenNums(cellObjArray, groupObjArray);
       const changes2 = removeTakenNumsFromPossVals(cellObjArray, groupObjArray);
-      const changes3 = uniquePossValInBox(cellObjArray, groupObjArray);
-      const changes4 = removePossValIfMustBeInDifferentBox(cellObjArray, groupObjArray);
-      if (changes1 || changes2 || changes3 || changes4) {
+      const changes3 = uniquePossValInGroup(cellObjArray, groupObjArray);
+      const changes4 = removePossValIfMustBeInDifferentKnownBox(cellObjArray, groupObjArray);
+      const changes5 = removePossValIfMustBeInPerfectSubset(cellObjArray, groupObjArray);
+      const changes6 = removePossValIfMustBeInDifferentUnknownBox(cellObjArray, groupObjArray);
+      if (changes1 || changes2 || changes3 || changes4 || changes5 || changes6) {
         anyChangesMade = true;
         runCellSelfUpdates(cellObjArray);
       } else {
@@ -251,6 +460,13 @@ function solve() {
       }
     } while (anyChangesMade);
 
+    // for testing:
+    cellObjArray.forEach(cellObj => {
+      if (cellObj.possVals.length > 0) {
+        document.querySelector(`#row${cellObj.row-1}col${cellObj.col-1}input`).value = cellObj.possVals;
+        document.querySelector(`#row${cellObj.row-1}col${cellObj.col-1}input`).classList.add('possVals');
+      }
+    });
 
     if (groupContradictionChecker(groupObjArray) || cellContradictionChecker(cellObjArray)) {
       return true;
@@ -261,6 +477,8 @@ function solve() {
     document.querySelector('#unsolvable').classList.remove('hidden');
     return;
   }
+
+  document.querySelector('#restart').classList.remove('hidden');
 
 }
 
@@ -361,6 +579,24 @@ function setupClearButton() {
     setupBoard();
     setupBadInputWarning();
     document.querySelector('#unsolvable').classList.add('hidden');
+    document.querySelector('#restart').classList.add('hidden');
+  });
+}
+
+function setupResetPuzzleButton() {
+  document.querySelector('#restart').addEventListener('click', () => {
+    const allGeneratedInputs = document.querySelectorAll('.generated');
+    const allPossValInputs = document.querySelectorAll('.possVals');
+    allGeneratedInputs.forEach(input => {
+      input.value = '';
+      input.classList.remove('generated');
+    });
+    allPossValInputs.forEach(input => {
+      input.value = '';
+      input.classList.remove('possVals');
+    });
+    document.querySelector('#unsolvable').classList.add('hidden');
+    document.querySelector('#restart').classList.add('hidden');
   });
 }
 
@@ -382,9 +618,11 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupClearButton);
     document.addEventListener('DOMContentLoaded', setupSubmitButton);
     document.addEventListener('DOMContentLoaded', setupBadInputWarning);
+    document.addEventListener('DOMContentLoaded', setupResetPuzzleButton);
 } else {
     setupBoard();
     setupClearButton();
     setupSubmitButton();
     setupBadInputWarning();
+    setupResetPuzzleButton();
 }

@@ -60,6 +60,15 @@ input:focus {
   animation: .2s 2 alternate warningAnimation;
 }
 
+.generated {
+  color: crimson;
+}
+
+.possVals {
+  color: dodgerblue;
+  font-size: 10px;
+}
+
 #buttons, #unsolvable {
   text-align: center;
 }
