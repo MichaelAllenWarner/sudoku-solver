@@ -1,0 +1,22 @@
+{
+  "name": "sudoku",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MichaelAllenWarner/sudoku-solver.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MichaelAllenWarner/sudoku-solver/issues"
+  },
+  "homepage": "https://github.com/MichaelAllenWarner/sudoku-solver#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}

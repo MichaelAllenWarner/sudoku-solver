@@ -96,8 +96,6 @@ function solve() {
       });
 
       if (pushesToMake.length > 0) {
-        console.log('Pushes to make: ');
-        console.log(pushesToMake);
         pushesToMake.forEach(groupObjAndCellObjPair => {
           const groupObj = groupObjAndCellObjPair[0];
           const cellObj = groupObjAndCellObjPair[1];
@@ -407,12 +405,210 @@ function solve() {
         });
       }
       if (splicesToMake.length > 0) {
-        console.log(splicesToMake);
         splicesToMake.forEach(cellObjAndDigitPair => {
           const cellObj = cellObjAndDigitPair[0];
           const digit = cellObjAndDigitPair[1];
           const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
           if (indexToSplice !== -1) {
+            console.log('Splice bc in different unknown box: ');
+            console.log('cell possVals: ');
+            console.log(cellObj.possVals);
+            console.log('digit to splice: ');
+            console.log(digit);
+            cellObj.possVals.splice(indexToSplice, 1);
+          }
+        });
+        anyChangesMadeHere = true;
+      }
+
+      return anyChangesMadeHere;
+    }
+
+    function xWing(cellObjArray, groupObjArray) {
+
+      let anyChangesMadeHere = false;
+
+      const splicesToMake = [];
+
+      const rowObjArray = groupObjArray.filter(obj => obj instanceof Row);
+      const colObjArray = groupObjArray.filter(obj => obj instanceof Col);
+
+      const allQualDigitsAndColNums = []; // format: [[[[digit, col#, col#], [digit, col#, col#]... ], row#], [etc]] add after dealing w/ duplicate
+      const duplicateQualDigitsAndColNums = []; // format: [[[digit, col#, col#], [row#s]], [[digit, col#, col#], [row#s]] ...] add or add to row#s
+      rowObjArray.forEach(rowObj => {
+        const digitsAndColNums = [];
+        for (let digit = 1; digit < 10; digit++) {
+          const colNums = [];
+          cellObjArray.forEach(cellObj => {
+            if (cellObj.row === rowObj.num && cellObj.possVals.includes(digit)) {
+              colNums.push(cellObj.col);
+            }
+          });
+          if (colNums.length === 2) {
+            colNums.sort();
+            digitsAndColNums.push([digit, colNums[0], colNums[1]]);
+          }
+        }
+        if (allQualDigitsAndColNums.length === 0) {
+          allQualDigitsAndColNums.push([digitsAndColNums, rowObj.num]);
+        } else {
+          digitsAndColNums.forEach(digAndColNums => {
+            let existsInDuplicateArray = false;
+            for (let i = 0; i < duplicateQualDigitsAndColNums.length; i++) {
+              if (digAndColNums.join() === duplicateQualDigitsAndColNums[i][0].join()) {
+                existsInDuplicateArray = true;
+                if (!duplicateQualDigitsAndColNums[i][1].includes(rowObj.num)) {
+                  duplicateQualDigitsAndColNums[i][1].push(rowObj.num);
+                  // break; ???
+                }
+              }
+            }
+            for (let i = 0; i < allQualDigitsAndColNums.length; i++) {
+              for (let j = 0; j < allQualDigitsAndColNums[i][0].length; j++) {
+                if (digAndColNums.join() === allQualDigitsAndColNums[i][0][j].join() && !existsInDuplicateArray) {
+                  duplicateQualDigitsAndColNums.push([digAndColNums, [allQualDigitsAndColNums[i][1], rowObj.num]]);
+                }
+                // else if here to add to allQualDigitsAndColNums only selectively ??
+              }
+            }
+          });
+          allQualDigitsAndColNums.push([digitsAndColNums, rowObj.num]);
+        }
+      });
+      if (duplicateQualDigitsAndColNums.length > 0) {
+        duplicateQualDigitsAndColNums.forEach(duplicate => {
+          cellObjArray.forEach(cellObj => {
+            if ((cellObj.col === duplicate[0][1] || cellObj.col === duplicate[0][2]) && !duplicate[1].includes(cellObj.row) && cellObj.possVals.includes(duplicate[0][0])) {
+              splicesToMake.push([cellObj, duplicate[0][0]]);
+            }
+          });
+        });
+      }
+
+      const allQualDigitsAndRowNums = [];
+      const duplicateQualDigitsAndRowNums = [];
+      colObjArray.forEach(colObj => {
+        const digitsAndRowNums = [];
+        for (let digit = 1; digit < 10; digit++) {
+          const rowNums = [];
+          cellObjArray.forEach(cellObj => {
+            if (cellObj.col === colObj.num && cellObj.possVals.includes(digit)) {
+              rowNums.push(cellObj.row);
+            }
+          });
+          if (rowNums.length === 2) {
+            rowNums.sort();
+            digitsAndRowNums.push([digit, rowNums[0], rowNums[1]]);
+          }
+        }
+        if (allQualDigitsAndRowNums.length === 0) {
+          allQualDigitsAndRowNums.push([digitsAndRowNums, colObj.num]);
+        } else {
+          digitsAndRowNums.forEach(digAndRowNums => {
+            let existsInDuplicateArray = false;
+            for (let i = 0; i < duplicateQualDigitsAndRowNums.length; i++) {
+              if (digAndRowNums.join() === duplicateQualDigitsAndRowNums[i][0].join()) {
+                existsInDuplicateArray = true;
+                if (!duplicateQualDigitsAndRowNums[i][1].includes(colObj.num)) {
+                  duplicateQualDigitsAndRowNums[i][1].push(colObj.num);
+                  // break; ???
+                }
+              }
+            }
+            for (let i = 0; i < allQualDigitsAndRowNums.length; i++) {
+              for (let j = 0; j < allQualDigitsAndRowNums[i][0].length; j++) {
+                if (digAndRowNums.join() === allQualDigitsAndRowNums[i][0][j].join() && !existsInDuplicateArray) {
+                  duplicateQualDigitsAndRowNums.push([digAndRowNums, [allQualDigitsAndRowNums[i][1], colObj.num]]);
+                }
+                // else if here to add to allQualDigitsAndRowNums only selectively ??
+              }
+            }
+          });
+          allQualDigitsAndRowNums.push([digitsAndRowNums, colObj.num]);
+        }
+      });
+      if (duplicateQualDigitsAndRowNums.length > 0) {
+        duplicateQualDigitsAndRowNums.forEach(duplicate => {
+          cellObjArray.forEach(cellObj => {
+            if ((cellObj.row === duplicate[0][1] || cellObj.row === duplicate[0][2]) && !duplicate[1].includes(cellObj.col) && cellObj.possVals.includes(duplicate[0][0])) {
+              splicesToMake.push([cellObj, duplicate[0][0]]);
+            }
+          });
+        });
+      }
+
+
+      if (splicesToMake.length > 0) {
+        splicesToMake.forEach(cellObjAndDigitPair => {
+          const cellObj = cellObjAndDigitPair[0];
+          const digit = cellObjAndDigitPair[1];
+          const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
+          if (indexToSplice !== -1) {
+            console.log('X-Wing Splice: ');
+            console.log('cell possVals: ');
+            console.log(cellObj.possVals);
+            console.log('digit to splice: ');
+            console.log(digit);
+            cellObj.possVals.splice(indexToSplice, 1);
+          }
+        });
+        anyChangesMadeHere = true;
+      }
+
+      return anyChangesMadeHere;
+    }
+
+    function removePossValIfMustBeInDifferentRowOrCol(cellObjArray, groupObjArray) {
+
+      let anyChangesMadeHere = false;
+
+      const splicesToMake = [];
+
+      const nonBoxObjArray = groupObjArray.filter(obj => !(obj instanceof Box));
+
+      nonBoxObjArray.forEach(groupObj => {
+        const possValObjects =[];
+        for (let i = 1; i < 10; i++) {
+          possValObjects.push({
+            number: i,
+            boxesWithNumberAsPossVal: []
+          });
+        }
+        cellObjArray.forEach(cellObj => {
+          if (cellObj[groupObj.groupType] === groupObj.num) {
+            for (let i = 1; i < 10; i++) {
+              if (cellObj.possVals.includes(i)) {
+                if (!possValObjects[i-1].boxesWithNumberAsPossVal.includes(cellObj.box)) {
+                  possValObjects[i-1].boxesWithNumberAsPossVal.push(cellObj.box);
+                }
+              }
+            }
+          }
+        });
+        possValObjects.forEach(possValObject => {
+          const valToRemove = possValObject.number;
+          if (possValObject.boxesWithNumberAsPossVal.length === 1) {
+            const cellsInSameBoxButDifferentLine = cellObjArray.filter(cellObj => (cellObj.box === possValObject.boxesWithNumberAsPossVal[0] && cellObj[groupObj.groupType] !== groupObj.num));
+            cellsInSameBoxButDifferentLine.forEach(cellObj => {
+              if (cellObj.possVals.includes(valToRemove)) {
+                splicesToMake.push([cellObj, valToRemove]);
+              }
+            });
+          }
+        });
+      });
+
+      if (splicesToMake.length > 0) {
+        splicesToMake.forEach(cellObjAndDigitPair => {
+          const cellObj = cellObjAndDigitPair[0];
+          const digit = cellObjAndDigitPair[1];
+          const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
+          if (indexToSplice !== -1) {
+            console.log('splice bc must be in different row or col: ');
+            console.log('cell possVals: ');
+            console.log(cellObj.possVals);
+            console.log('digit to splice: ');
+            console.log(digit);
             cellObj.possVals.splice(indexToSplice, 1);
           }
         });
@@ -452,7 +648,9 @@ function solve() {
       const changes4 = removePossValIfMustBeInDifferentKnownBox(cellObjArray, groupObjArray);
       const changes5 = removePossValIfMustBeInPerfectSubset(cellObjArray, groupObjArray);
       const changes6 = removePossValIfMustBeInDifferentUnknownBox(cellObjArray, groupObjArray);
-      if (changes1 || changes2 || changes3 || changes4 || changes5 || changes6) {
+      const changes7 = xWing(cellObjArray, groupObjArray);
+      const changes8 = removePossValIfMustBeInDifferentRowOrCol(cellObjArray, groupObjArray);
+      if (changes1 || changes2 || changes3 || changes4 || changes5 || changes6 || changes7 || changes8) {
         anyChangesMade = true;
         runCellSelfUpdates(cellObjArray);
       } else {
