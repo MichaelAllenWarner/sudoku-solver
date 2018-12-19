@@ -12,6 +12,10 @@ function solve() {
       this.colTakenNumsContributor = false;
       this.boxTakenNumsContributor = false;
     }
+
+    id() {
+      return 9*(this.row - 1) + this.col;
+    }
     selfUpdate() {
       if (!this.val && this.possVals.length === 1) {
         this.val = this.possVals[0];
@@ -19,7 +23,6 @@ function solve() {
         document.querySelector(`#row${this.row-1}col${this.col-1}input`).value = this.val; // for testing
         document.querySelector(`#row${this.row-1}col${this.col-1}input`).classList.remove('possVals');
         document.querySelector(`#row${this.row-1}col${this.col-1}input`).classList.add('generated');
-
       }
     }
     checkForNoPossValsLeft() {
@@ -618,6 +621,109 @@ function solve() {
       return anyChangesMadeHere;
     }
 
+    function removePossValBecauseCellIsPartOfHiddenSubset(cellObjArray, groupObjArray) {
+
+      let anyChangesMadeHere = false;
+
+      const splicesToMake = [];
+
+      groupObjArray.forEach(groupObj => {
+        const possValsInGroupWithCellIDs = [];
+        for (let digit = 1; digit < 10; digit++) {
+          possValsInGroupWithCellIDs.push([digit, []]);
+        }
+        cellObjArray.forEach(cellObj => {
+          if (cellObj[groupObj.groupType] === groupObj.num) {
+            for (let digit = 1; digit < 10; digit++) {
+              if (cellObj.possVals.includes(digit)) {
+                possValsInGroupWithCellIDs[digit-1][1].push(cellObj.id());
+              }
+            }
+          }
+        });
+        const qualPossValsInGroupWithCellIDs = [];
+        possValsInGroupWithCellIDs.forEach(candidate => {
+          if (candidate[1].length < 4 && candidate[1].length > 1) {
+            qualPossValsInGroupWithCellIDs.push(candidate);
+          }
+        });
+        qualPossValsInGroupWithCellIDs.forEach(primaryCandidate => {
+          qualPossValsInGroupWithCellIDs.forEach(secondaryCandidate => {
+            if (primaryCandidate[0] !== secondaryCandidate[0]) {
+              const uniqueCellIDsForPair = [];
+              primaryCandidate[1].forEach(cellID => {
+                uniqueCellIDsForPair.push(cellID);
+              });
+              secondaryCandidate[1].forEach(cellID => {
+                if (!uniqueCellIDsForPair.includes(cellID)) {
+                  uniqueCellIDsForPair.push(cellID);
+                }
+              });
+              if (uniqueCellIDsForPair.length === 2) {
+                cellObjArray.forEach(cellObj => {
+                  if (uniqueCellIDsForPair.includes(cellObj.id())) {
+                    cellObj.possVals.forEach(possVal => {
+                      if (possVal !== primaryCandidate[0] && possVal !== secondaryCandidate[0]) {
+                        splicesToMake.push([cellObj, possVal]);
+                      }
+                    });
+                  }
+                });
+              }
+              if (uniqueCellIDsForPair.length === 3) {
+                qualPossValsInGroupWithCellIDs.forEach(tertiaryCandidate => {
+                  if (tertiaryCandidate[0] !== primaryCandidate[0] && tertiaryCandidate[0] !== secondaryCandidate[0]) {
+                    const uniqueCellIDsForTrio = [];
+                    uniqueCellIDsForPair.forEach(cellID => {
+                      uniqueCellIDsForTrio.push(cellID);
+                    });
+                    tertiaryCandidate[1].forEach(cellID => {
+                      if (!uniqueCellIDsForTrio.includes(cellID)) {
+                        uniqueCellIDsForTrio.push(cellID);
+                      }
+                    });
+                    if (uniqueCellIDsForTrio.length === 3) {
+                      cellObjArray.forEach(cellObj => {
+                        if (uniqueCellIDsForTrio.includes(cellObj.id())) {
+                          cellObj.possVals.forEach(possVal => {
+                            if (possVal !== primaryCandidate[0] && possVal !== secondaryCandidate[0] && possVal !== tertiaryCandidate[0]) {
+                              splicesToMake.push([cellObj, possVal]);
+                            }
+                          });
+                        }
+                      });
+                    }
+                  }
+                });
+              }
+            }
+          });
+        });
+      });
+
+
+      if (splicesToMake.length > 0) {
+        splicesToMake.forEach(cellObjAndDigitPair => {
+          const cellObj = cellObjAndDigitPair[0];
+          const digit = cellObjAndDigitPair[1];
+          const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
+          if (indexToSplice !== -1) {
+            console.log('splice bc hidden subset: ');
+            console.log('cell ID: ');
+            console.log(cellObj.id());
+            console.log('cell possVals: ');
+            console.log(cellObj.possVals);
+            console.log('digit to splice: ');
+            console.log(digit);
+            cellObj.possVals.splice(indexToSplice, 1);
+          }
+        });
+        anyChangesMadeHere = true;
+      }
+
+      return anyChangesMadeHere;
+    }
+
     function runCellSelfUpdates(cellObjArray) {
       cellObjArray.forEach(cellObj => {
         cellObj.selfUpdate();
@@ -650,7 +756,8 @@ function solve() {
       const changes6 = removePossValIfMustBeInDifferentUnknownBox(cellObjArray, groupObjArray);
       const changes7 = xWing(cellObjArray, groupObjArray);
       const changes8 = removePossValIfMustBeInDifferentRowOrCol(cellObjArray, groupObjArray);
-      if (changes1 || changes2 || changes3 || changes4 || changes5 || changes6 || changes7 || changes8) {
+      const changes9 = removePossValBecauseCellIsPartOfHiddenSubset(cellObjArray, groupObjArray);
+      if (changes1 || changes2 || changes3 || changes4 || changes5 || changes6 || changes7 || changes8 || changes9) {
         anyChangesMade = true;
         runCellSelfUpdates(cellObjArray);
       } else {
