@@ -24,6 +24,10 @@ function solve() {
         document.querySelector(`#row${this.row-1}col${this.col-1}input`).classList.remove('possVals');
         document.querySelector(`#row${this.row-1}col${this.col-1}input`).classList.add('generated');
       }
+      if (this.possVals.length > 0) {
+        document.querySelector(`#row${this.row-1}col${this.col-1}input`).value = this.possVals;
+        document.querySelector(`#row${this.row-1}col${this.col-1}input`).classList.add('possVals');
+      }
     }
     checkForNoPossValsLeft() {
       if (!this.val && this.possVals.length === 0) {
@@ -724,6 +728,208 @@ function solve() {
       return anyChangesMadeHere;
     }
 
+    function singlesChaining(cellObjArray, groupObjArray) {
+
+      let anyChangesMadeHere = false;
+
+      const splicesToMake = [];
+
+      const digitsWithConjPairs = [];
+      for (let digit = 1; digit < 10; digit++) {
+        digitsWithConjPairs.push([digit, []]);
+      }
+      groupObjArray.forEach(groupObj => {
+        for (let digit = 1; digit < 10; digit++) {
+          const cellObjsWithDigAsPossValInGroup = [];
+          cellObjArray.forEach(cellObj => {
+            if (cellObj[groupObj.groupType] === groupObj.num && cellObj.possVals.length > 1 && cellObj.possVals.includes(digit)) {
+              cellObjsWithDigAsPossValInGroup.push(cellObj);
+            }
+          });
+          if (cellObjsWithDigAsPossValInGroup.length === 2) {
+            digitsWithConjPairs[digit - 1][1].push(cellObjsWithDigAsPossValInGroup);
+          }
+        }
+      });
+      digitsWithConjPairs.forEach(digWithConjPairs => {
+        if (digWithConjPairs[1].length > 2) {
+          const digit = digWithConjPairs[0];
+          const conjPairs = []; // format: [[cellObj1, cellObj2], [cellObj1, cellObj2], ...]
+          digWithConjPairs[1].forEach(conjPair => {
+            conjPairs.push(conjPair);
+          });
+
+          const singlesChains = [];
+
+          let outerChangesMade;
+          do {
+            outerChangesMade = false;
+            function checkIfConjPairAlreadyInASinglesChain(conjPair, singlesChains) {
+              const conjPairIDs = [conjPair[0].id(), conjPair[1].id()].sort();
+              for (let j = 0; j < singlesChains.length; j++) {
+                const singlesChain = singlesChains[j];
+                for (let k = 0; k < singlesChain.length; k++) {
+                  const chainPair = singlesChain[k];
+                  const chainPairIDs = [chainPair[0].id(), chainPair[1].id()].sort();
+                  if (conjPairIDs.join() === chainPairIDs.join()) {
+                    return true;
+                  }
+                }
+              }
+            }
+            let innerChangesMade;
+            do {
+              innerChangesMade = false;
+              conjPairsLoop:
+              for (let i = 0; i < conjPairs.length; i++) {
+                const conjPair = conjPairs[i];
+                if (checkIfConjPairAlreadyInASinglesChain(conjPair, singlesChains)) {
+                  continue;
+                }
+                for (let j = 0; j < singlesChains.length; j++) {
+                  const singlesChain = singlesChains[j];
+                  for (let k = 0; k < singlesChain.length; k++) {
+                    const chainPair = singlesChain[k];
+                    const chainPairIDs = [chainPair[0].id(), chainPair[1].id()];
+                    if (chainPairIDs.includes(conjPair[0].id()) || chainPairIDs.includes(conjPair[1].id())) {
+                      singlesChain.push(conjPair);
+                      innerChangesMade = true;
+                      outerChangesMade = true;
+                      continue conjPairsLoop;
+                    }
+                  }
+                }
+              }
+            } while (innerChangesMade);
+            for (let i = 0; i < conjPairs.length; i++) {
+              const conjPair = conjPairs[i];
+              if (checkIfConjPairAlreadyInASinglesChain(conjPair, singlesChains)) {
+                continue;
+              }
+              singlesChains.push([conjPair]);
+              outerChangesMade = true;
+              break; // so only one new singlesChain is added at a time
+            }
+          } while (outerChangesMade);
+
+          singlesChains.forEach(chain => {
+            if (chain.length > 2) {
+              const catACells = [];
+              const catBCells = [];
+              const catACellIDs = [];
+              const catBCellIDs = [];
+              const cellIDsAccountedFor = [];
+              let changesMade;
+              do {
+                changesMade = false;
+                chain.forEach(pair => {
+                  if (cellIDsAccountedFor.length === 0) {
+                    catACells.push(pair[0]);
+                    catBCells.push(pair[1]);
+                    catACellIDs.push(pair[0].id());
+                    catBCellIDs.push(pair[1].id());
+                    cellIDsAccountedFor.push(pair[0].id());
+                    cellIDsAccountedFor.push(pair[1].id());
+                    changesMade = true;
+                  } else {
+                    if (cellIDsAccountedFor.includes(pair[0].id()) && !cellIDsAccountedFor.includes(pair[1].id())) {
+                      if (catACellIDs.includes(pair[0].id())) {
+                        catBCells.push(pair[1]);
+                        catBCellIDs.push(pair[1].id());
+                        cellIDsAccountedFor.push(pair[1].id());
+                        changesMade = true;
+                      } else {
+                        catACells.push(pair[1]);
+                        catACellIDs.push(pair[1].id());
+                        cellIDsAccountedFor.push(pair[1].id());
+                        changesMade = true;
+                      }
+                    }
+                    if (cellIDsAccountedFor.includes(pair[1].id()) && !cellIDsAccountedFor.includes(pair[0].id())) {
+                      if (catACellIDs.includes(pair[1].id())) {
+                        catBCells.push(pair[0]);
+                        catBCellIDs.push(pair[0].id());
+                        cellIDsAccountedFor.push(pair[0].id());
+                        changesMade = true;
+                      } else {
+                        catACells.push(pair[0]);
+                        catACellIDs.push(pair[0].id());
+                        cellIDsAccountedFor.push(pair[0].id());
+                        changesMade = true;
+                      }
+                    }
+                  }
+                });
+              } while (changesMade);
+
+              groupObjArray.forEach(groupObj => {
+                const cellsInThisGroup = [];
+                const cellIDsInThisGroup = [];
+                cellObjArray.forEach(cellObj => {
+                  if (cellObj[groupObj.groupType] === groupObj.num) {
+                    cellsInThisGroup.push(cellObj);
+                    cellIDsInThisGroup.push(cellObj.id());
+                  }
+                });
+                const catACellIDsInGroup = [];
+                const catBCellIDsInGroup = [];
+                catACellIDs.forEach(cellID => {
+                  if (cellIDsInThisGroup.includes(cellID)) {
+                    catACellIDsInGroup.push(cellID);
+                  }
+                });
+                catBCellIDs.forEach(cellID => {
+                  if (cellIDsInThisGroup.includes(cellID)) {
+                    catBCellIDsInGroup.push(cellID);
+                  }
+                });
+
+                // if group contains >1 of catA (or catB) cells and 0 catB (or catA), then catA (B) cells CANNOT be digit in question
+                if (catACellIDsInGroup.length > 1 && catBCellIDsInGroup.length === 0) {
+                  catACells.forEach(cellObj => {
+                    splicesToMake.push([cellObj, digit]);
+                  });
+                }
+                if (catBCellIDsInGroup.length > 1 && catACellIDsInGroup.length === 0) {
+                  catBCells.forEach(cellObj => {
+                    splicesToMake.push([cellObj, digit]);
+                  });
+                }
+              });
+
+              // if cell w/ digit as possVal is NOT in catA or catB...
+              // ... but is in same GROUP with a catA and also in same GROUP with a catB (doesn't have to be same group for them),
+              // ... then digit can be eliminated as possVal for this cell
+
+            }
+          });
+
+        }
+      });
+
+
+      if (splicesToMake.length > 0) {
+        splicesToMake.forEach(cellObjAndDigitPair => {
+          const cellObj = cellObjAndDigitPair[0];
+          const digit = cellObjAndDigitPair[1];
+          const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
+          if (indexToSplice !== -1) {
+            console.log('splice bc single chain: ');
+            console.log('cell ID: ');
+            console.log(cellObj.id());
+            console.log('cell possVals: ');
+            console.log(cellObj.possVals);
+            console.log('digit to splice: ');
+            console.log(digit);
+            cellObj.possVals.splice(indexToSplice, 1);
+          }
+        });
+        anyChangesMadeHere = true;
+      }
+
+      return anyChangesMadeHere;
+    }
+
     function runCellSelfUpdates(cellObjArray) {
       cellObjArray.forEach(cellObj => {
         cellObj.selfUpdate();
@@ -757,7 +963,8 @@ function solve() {
       const changes7 = xWing(cellObjArray, groupObjArray);
       const changes8 = removePossValIfMustBeInDifferentRowOrCol(cellObjArray, groupObjArray);
       const changes9 = removePossValBecauseCellIsPartOfHiddenSubset(cellObjArray, groupObjArray);
-      if (changes1 || changes2 || changes3 || changes4 || changes5 || changes6 || changes7 || changes8 || changes9) {
+      const changes10 = singlesChaining(cellObjArray, groupObjArray);
+      if (changes1 || changes2 || changes3 || changes4 || changes5 || changes6 || changes7 || changes8 || changes9 || changes10) {
         anyChangesMade = true;
         runCellSelfUpdates(cellObjArray);
       } else {
@@ -765,13 +972,6 @@ function solve() {
       }
     } while (anyChangesMade);
 
-    // for testing:
-    cellObjArray.forEach(cellObj => {
-      if (cellObj.possVals.length > 0) {
-        document.querySelector(`#row${cellObj.row-1}col${cellObj.col-1}input`).value = cellObj.possVals;
-        document.querySelector(`#row${cellObj.row-1}col${cellObj.col-1}input`).classList.add('possVals');
-      }
-    });
 
     if (groupContradictionChecker(groupObjArray) || cellContradictionChecker(cellObjArray)) {
       return true;
