@@ -1,5 +1,4 @@
-function solve() {
-  document.querySelector('#unsolvable').classList.add('hidden');
+function solve(boardString) {
 
   class Cell {
     constructor(row, col, box, val) {
@@ -14,7 +13,7 @@ function solve() {
     }
 
     id() {
-      return 9*(this.row - 1) + this.col;
+      return 9*(this.row - 1) + (this.col-1);
     }
     selfUpdate() {
       if (!this.val && this.possVals.length === 1) {
@@ -59,23 +58,15 @@ function solve() {
   class Box extends Group {}
 
   const cellObjArray = [];
-  for (let i = 0; i < 9; i++) {
-    for (let j = 0; j < 9; j++) {
-      const row = i + 1;
-      const col = j + 1;
-      const box = (i <= 2 && j <= 2) ? 1
-      : (i <= 2 && j >= 3 && j <= 5) ? 2
-      : (i <= 2 && j >= 6) ? 3
-      : (i >= 3 && i <= 5 && j <= 2) ? 4
-      : (i >= 3 && i <= 5 && j >= 3 && j <= 5) ? 5
-      : (i >= 3 && i <= 5 && j >= 6) ? 6
-      : (i >= 6 && j <= 2) ? 7
-      : (i >= 6 && j >= 3 && j <= 5) ? 8
-      : 9;
-      const val = +document.querySelector(`#row${i}col${j}input`).value;
-      cellObjArray.push(new Cell(row, col, box, val));
-    }
+  const boardArray = boardString.split(',');
+  for (const [index, value] of boardArray.entries()) {
+    const row = Math.floor(index / 9) + 1;
+    const col = (index % 9) + 1;
+    const box = ((3 * Math.floor((row - 1) / 3)) + Math.floor((col - 1) / 3)) + 1;
+    const val = +value;
+    cellObjArray.push(new Cell(row, col, box, val));
   }
+
 
   const groupObjArray = [];
   for (let num = 1; num < 10; num++) {
@@ -417,11 +408,11 @@ function solve() {
           const digit = cellObjAndDigitPair[1];
           const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
           if (indexToSplice !== -1) {
-            console.log('Splice bc in different unknown box: ');
-            console.log('cell possVals: ');
-            console.log(cellObj.possVals);
-            console.log('digit to splice: ');
-            console.log(digit);
+            // console.log('Splice bc in different unknown box: ');
+            // console.log('cell possVals: ');
+            // console.log(cellObj.possVals);
+            // console.log('digit to splice: ');
+            // console.log(digit);
             cellObj.possVals.splice(indexToSplice, 1);
           }
         });
@@ -551,11 +542,11 @@ function solve() {
           const digit = cellObjAndDigitPair[1];
           const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
           if (indexToSplice !== -1) {
-            console.log('X-Wing Splice: ');
-            console.log('cell possVals: ');
-            console.log(cellObj.possVals);
-            console.log('digit to splice: ');
-            console.log(digit);
+            // console.log('X-Wing Splice: ');
+            // console.log('cell possVals: ');
+            // console.log(cellObj.possVals);
+            // console.log('digit to splice: ');
+            // console.log(digit);
             cellObj.possVals.splice(indexToSplice, 1);
           }
         });
@@ -611,11 +602,11 @@ function solve() {
           const digit = cellObjAndDigitPair[1];
           const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
           if (indexToSplice !== -1) {
-            console.log('splice bc must be in different row or col: ');
-            console.log('cell possVals: ');
-            console.log(cellObj.possVals);
-            console.log('digit to splice: ');
-            console.log(digit);
+            // console.log('splice bc must be in different row or col: ');
+            // console.log('cell possVals: ');
+            // console.log(cellObj.possVals);
+            // console.log('digit to splice: ');
+            // console.log(digit);
             cellObj.possVals.splice(indexToSplice, 1);
           }
         });
@@ -712,13 +703,13 @@ function solve() {
           const digit = cellObjAndDigitPair[1];
           const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
           if (indexToSplice !== -1) {
-            console.log('splice bc hidden subset: ');
-            console.log('cell ID: ');
-            console.log(cellObj.id());
-            console.log('cell possVals: ');
-            console.log(cellObj.possVals);
-            console.log('digit to splice: ');
-            console.log(digit);
+            // console.log('splice bc hidden subset: ');
+            // console.log('cell ID: ');
+            // console.log(cellObj.id());
+            // console.log('cell possVals: ');
+            // console.log(cellObj.possVals);
+            // console.log('digit to splice: ');
+            // console.log(digit);
             cellObj.possVals.splice(indexToSplice, 1);
           }
         });
@@ -914,13 +905,13 @@ function solve() {
           const digit = cellObjAndDigitPair[1];
           const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
           if (indexToSplice !== -1) {
-            console.log('splice bc single chain: ');
-            console.log('cell ID: ');
-            console.log(cellObj.id());
-            console.log('cell possVals: ');
-            console.log(cellObj.possVals);
-            console.log('digit to splice: ');
-            console.log(digit);
+            // console.log('splice bc single chain: ');
+            // console.log('cell ID: ');
+            // console.log(cellObj.id());
+            // console.log('cell possVals: ');
+            // console.log(cellObj.possVals);
+            // console.log('digit to splice: ');
+            // console.log(digit);
             cellObj.possVals.splice(indexToSplice, 1);
           }
         });
@@ -978,14 +969,61 @@ function solve() {
     }
   }
 
-  if (solveAndCheckForInvalidPuzzle(cellObjArray, groupObjArray)) {
-    document.querySelector('#unsolvable').classList.remove('hidden');
-    return;
+
+ // invalid conditions:
+
+  const status = solveAndCheckForInvalidPuzzle(cellObjArray, groupObjArray);
+
+  if (status === true) {
+    return 'invalid';
   }
 
-  document.querySelector('#restart').classList.remove('hidden');
+  const cellObjectsWithoutValue = [];
+  cellObjArray.forEach(cellObj => {
+    if (!cellObj.val) {
+      cellObjectsWithoutValue.push(cellObj);
+    }
+  });
+  let numOfFilledInCells = 81 - cellObjectsWithoutValue.length;
+
+  if (numOfFilledInCells <= 17) {
+    return 'invalid';
+  }
+
+
+  // puzzle not invalid; now check if solved:
+
+  if (numOfFilledInCells === 81) { // solved
+    return 'solved';
+  } else { // not solved, start guessing
+    cellObjectsWithoutValue.sort((a, b) => a.possVals.length - b.possVals.length);
+    outerLoop:
+    for (const cellObj of cellObjectsWithoutValue) {
+      for (let i = 0; i < cellObj.possVals.length; i++) {
+        const guess = cellObj.possVals[i];
+        const boardArray = cellObjArray.map(cell => (cell.val) ? cell.val : 0);
+        boardArray.splice(cellObj.id(), 1, guess);
+        const newBoardString = boardArray.join();
+        console.log(newBoardString);
+        const innerStatus = solve(newBoardString);
+        if (innerStatus === 'solved') {
+          console.log('solved');
+          cellObj.possVals = [guess];
+          cellObj.selfUpdate();
+          return 'solved';
+        }
+        if (innerStatus === 'invalid') {
+          console.log('invalid');
+          if (i === cellObj.possVals.length - 1) {
+            return 'invalid';
+          }
+        }
+      }
+    }
+  }
 
 }
+
 
 function setupBoard() {
   const board = document.querySelector('table');
@@ -1106,7 +1144,23 @@ function setupResetPuzzleButton() {
 }
 
 function setupSubmitButton() {
-  document.querySelector('#submit').addEventListener('click', solve);
+  document.querySelector('#submit').addEventListener('click', () => {
+    document.querySelector('#unsolvable').classList.add('hidden');
+    const inputValArray = [];
+    const allInputs = document.querySelectorAll('input');
+    allInputs.forEach(input => {
+      if (input.value) {
+        inputValArray.push(input.value);
+      } else {
+        inputValArray.push(0);
+      }
+    });
+    const boardString = inputValArray.join();
+    if (solve(boardString) === 'invalid') {
+      document.querySelector('#unsolvable').classList.remove('hidden');
+    }
+    document.querySelector('#restart').classList.remove('hidden');
+  });
 }
 
 function setupBadInputWarning() {
