@@ -986,38 +986,30 @@ function solve(boardString) {
   });
   let numOfFilledInCells = 81 - cellObjectsWithoutValue.length;
 
-  if (numOfFilledInCells <= 17) {
+  if (numOfFilledInCells <= 17) { // apparently the minimum for a valid puzzle
     return 'invalid';
   }
 
 
-  // puzzle not invalid; now check if solved:
+  // puzzle valid, now check if solved (if not, start guessing):
 
-  if (numOfFilledInCells === 81) { // solved
+  if (numOfFilledInCells === 81) {
     return 'solved';
   } else { // not solved, start guessing
     cellObjectsWithoutValue.sort((a, b) => a.possVals.length - b.possVals.length);
-    outerLoop:
-    for (const cellObj of cellObjectsWithoutValue) {
-      for (let i = 0; i < cellObj.possVals.length; i++) {
-        const guess = cellObj.possVals[i];
-        const boardArray = cellObjArray.map(cell => (cell.val) ? cell.val : 0);
-        boardArray.splice(cellObj.id(), 1, guess);
-        const newBoardString = boardArray.join();
-        console.log(newBoardString);
-        const innerStatus = solve(newBoardString);
-        if (innerStatus === 'solved') {
-          console.log('solved');
-          cellObj.possVals = [guess];
-          cellObj.selfUpdate();
-          return 'solved';
-        }
-        if (innerStatus === 'invalid') {
-          console.log('invalid');
-          if (i === cellObj.possVals.length - 1) {
-            return 'invalid';
-          }
-        }
+    const guessingCell = cellObjectsWithoutValue[0];
+    for (const [index, guess] of guessingCell.possVals.entries()) {
+      const boardArray = cellObjArray.map(cellObj => (cellObj.val) ? cellObj.val : 0);
+      boardArray.splice(guessingCell.id(), 1, guess);
+      const newBoardString = boardArray.join();
+      const innerSolveStatus = solve(newBoardString);
+      if (innerSolveStatus === 'solved') {
+        guessingCell.possVals = [guess];
+        guessingCell.selfUpdate();
+        return 'solved';
+      }
+      if (innerSolveStatus === 'invalid' && index === guessingCell.possVals.length - 1) {
+        return 'invalid';
       }
     }
   }
