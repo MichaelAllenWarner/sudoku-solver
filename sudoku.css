@@ -64,10 +64,6 @@ input:focus {
   color: crimson;
 }
 
-.possVals {
-  color: dodgerblue;
-  font-size: 10px;
-}
 
 #buttons, #unsolvable {
   text-align: center;

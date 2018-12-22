@@ -13,19 +13,12 @@ function solve(boardString) {
     }
 
     id() {
-      return 9*(this.row - 1) + (this.col-1);
+      return 9 * (this.row - 1) + (this.col - 1);
     }
     selfUpdate() {
       if (!this.val && this.possVals.length === 1) {
         this.val = this.possVals[0];
         this.possVals.pop();
-        document.querySelector(`#row${this.row-1}col${this.col-1}input`).value = this.val; // for testing
-        document.querySelector(`#row${this.row-1}col${this.col-1}input`).classList.remove('possVals');
-        document.querySelector(`#row${this.row-1}col${this.col-1}input`).classList.add('generated');
-      }
-      if (this.possVals.length > 0) {
-        document.querySelector(`#row${this.row-1}col${this.col-1}input`).value = this.possVals;
-        document.querySelector(`#row${this.row-1}col${this.col-1}input`).classList.add('possVals');
       }
     }
     checkForNoPossValsLeft() {
@@ -75,7 +68,7 @@ function solve(boardString) {
     groupObjArray.push(new Box('box', num));
   }
 
-  function solveAndCheckForInvalidPuzzle(cellObjArray, groupObjArray) {
+  function attemptSolveAndReturnCurrBoardArray(cellObjArray, groupObjArray) {
 
     function addValsToTakenNums(cellObjArray, groupObjArray) {
 
@@ -964,56 +957,37 @@ function solve(boardString) {
     } while (anyChangesMade);
 
 
-    if (groupContradictionChecker(groupObjArray) || cellContradictionChecker(cellObjArray)) {
-      return true;
+    // if no contradictions found, return current board array:
+    if (!groupContradictionChecker(groupObjArray) && !cellContradictionChecker(cellObjArray)) {
+      return cellObjArray.map(cellObj => (cellObj.val) ? cellObj.val : 0);
     }
   }
 
+  const currBoardArray = attemptSolveAndReturnCurrBoardArray(cellObjArray, groupObjArray);
 
- // invalid conditions:
-
-  const status = solveAndCheckForInvalidPuzzle(cellObjArray, groupObjArray);
-
-  if (status === true) {
-    return 'invalid';
-  }
-
-  const cellObjectsWithoutValue = [];
-  cellObjArray.forEach(cellObj => {
-    if (!cellObj.val) {
-      cellObjectsWithoutValue.push(cellObj);
-    }
-  });
-  let numOfFilledInCells = 81 - cellObjectsWithoutValue.length;
-
-  if (numOfFilledInCells <= 17) { // apparently the minimum for a valid puzzle
-    return 'invalid';
-  }
-
-
-  // puzzle valid, now check if solved (if not, start guessing):
-
-  if (numOfFilledInCells === 81) {
-    return 'solved';
-  } else { // not solved, start guessing
-    cellObjectsWithoutValue.sort((a, b) => a.possVals.length - b.possVals.length);
-    const guessingCell = cellObjectsWithoutValue[0];
-    for (const [index, guess] of guessingCell.possVals.entries()) {
-      const boardArray = cellObjArray.map(cellObj => (cellObj.val) ? cellObj.val : 0);
-      boardArray.splice(guessingCell.id(), 1, guess);
-      const newBoardString = boardArray.join();
-      const innerSolveStatus = solve(newBoardString);
-      if (innerSolveStatus === 'solved') {
-        guessingCell.possVals = [guess];
-        guessingCell.selfUpdate();
-        return 'solved';
-      }
-      if (innerSolveStatus === 'invalid' && index === guessingCell.possVals.length - 1) {
-        return 'invalid';
+  if (currBoardArray) { // no contradictions found
+    if (!currBoardArray.includes(0)) { // puzzle is solved, return array of current board
+      return currBoardArray;
+    } else { // not solved, start guessing
+      const cellObjectsWithoutValue = [];
+      cellObjArray.forEach(cellObj => {
+        if (!cellObj.val) {
+          cellObjectsWithoutValue.push(cellObj);
+        }
+      });
+      cellObjectsWithoutValue.sort((a, b) => a.possVals.length - b.possVals.length);
+      const guessingCell = cellObjectsWithoutValue[0];
+      for (const [index, guess] of guessingCell.possVals.entries()) {
+        currBoardArray.splice(guessingCell.id(), 1, guess);
+        const guessArray = solve(currBoardArray.join()); // recursive function
+        if (guessArray) { // puzzle is solved, return guessArray all the way up
+          return guessArray;
+        } else if (index === guessingCell.possVals.length - 1) { // found contradiction, back up
+          return;
+        }
       }
     }
   }
-
 }
 
 
@@ -1049,6 +1023,7 @@ function setupBoard() {
           this.classList.add('warning');
           return;
         }
+        this.classList.remove('generated');
         this.value = this.value.trim().slice(0,1); // in case something like " 3.0" was copy-pasted
         if (j !== 8) {
           document.querySelector(`#row${i}col${j+1}input`).focus();
@@ -1114,24 +1089,6 @@ function setupClearButton() {
     setupBoard();
     setupBadInputWarning();
     document.querySelector('#unsolvable').classList.add('hidden');
-    document.querySelector('#restart').classList.add('hidden');
-  });
-}
-
-function setupResetPuzzleButton() {
-  document.querySelector('#restart').addEventListener('click', () => {
-    const allGeneratedInputs = document.querySelectorAll('.generated');
-    const allPossValInputs = document.querySelectorAll('.possVals');
-    allGeneratedInputs.forEach(input => {
-      input.value = '';
-      input.classList.remove('generated');
-    });
-    allPossValInputs.forEach(input => {
-      input.value = '';
-      input.classList.remove('possVals');
-    });
-    document.querySelector('#unsolvable').classList.add('hidden');
-    document.querySelector('#restart').classList.add('hidden');
   });
 }
 
@@ -1148,10 +1105,18 @@ function setupSubmitButton() {
       }
     });
     const boardString = inputValArray.join();
-    if (solve(boardString) === 'invalid') {
+    const solutionArray = solve(boardString);
+    if (solutionArray) {
+      solutionArray.forEach((cellVal, index) => {
+        const inputBox = document.querySelector(`#row${Math.floor(index / 9)}col${index % 9}input`);
+        if (!inputBox.value) {
+          inputBox.classList.add('generated');
+          inputBox.value = cellVal;
+        }
+      });
+    } else {
       document.querySelector('#unsolvable').classList.remove('hidden');
     }
-    document.querySelector('#restart').classList.remove('hidden');
   });
 }
 
@@ -1169,11 +1134,9 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupClearButton);
     document.addEventListener('DOMContentLoaded', setupSubmitButton);
     document.addEventListener('DOMContentLoaded', setupBadInputWarning);
-    document.addEventListener('DOMContentLoaded', setupResetPuzzleButton);
 } else {
     setupBoard();
     setupClearButton();
     setupSubmitButton();
     setupBadInputWarning();
-    setupResetPuzzleButton();
 }
