@@ -51,7 +51,7 @@ function solve(boardString) {
   class Box extends Group {}
 
   const cellObjArray = [];
-  const boardArray = boardString.split(',');
+  const boardArray = boardString.split('');
   for (const [index, value] of boardArray.entries()) {
     const row = Math.floor(index / 9) + 1;
     const col = (index % 9) + 1;
@@ -979,7 +979,7 @@ function solve(boardString) {
       const guessingCell = cellObjectsWithoutValue[0];
       for (const [index, guess] of guessingCell.possVals.entries()) {
         currBoardArray.splice(guessingCell.id(), 1, guess);
-        const guessArray = solve(currBoardArray.join()); // recursive function
+        const guessArray = solve(currBoardArray.join('')); // recursive function
         if (guessArray) { // puzzle is solved, return guessArray all the way up
           return guessArray;
         } else if (index === guessingCell.possVals.length - 1) { // found contradiction, back up
@@ -1104,7 +1104,7 @@ function setupSubmitButton() {
         inputValArray.push(0);
       }
     });
-    const boardString = inputValArray.join();
+    const boardString = inputValArray.join('');
     const solutionArray = solve(boardString);
     if (solutionArray) {
       solutionArray.forEach((cellVal, index) => {
