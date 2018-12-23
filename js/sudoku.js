@@ -1145,6 +1145,12 @@ function setupStringEntry() {
       });
     }
   });
+  document.querySelector('#stringEntry').addEventListener('focus', function() {
+    this.select();
+  });
+  document.querySelector('#stringEntry').addEventListener('click', function() {
+    this.select();
+  });
 }
 
 if (document.readyState === 'loading') {
