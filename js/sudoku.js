@@ -1007,6 +1007,7 @@ function setupBoard() {
       }
       currCell.id = `row${i}col${j}`;
       const inputBox = document.createElement('input');
+      inputBox.classList.add('manualInput');
       inputBox.id = `row${i}col${j}input`;
 
       inputBox.addEventListener('focus', function() {
@@ -1086,18 +1087,20 @@ function setupClearButton() {
     allRows.forEach(row => {
       row.remove();
     });
+    const stringEntryBox = document.querySelector('#stringEntry');
+    stringEntryBox.value = stringEntryBox.defaultValue;
+    const solutionStringBox = document.querySelector('#solution');
+    solutionStringBox.value = solutionStringBox.defaultValue;
     setupBoard();
     setupBadInputWarning();
-    document.querySelector('#unsolvable').classList.add('hidden');
   });
 }
 
 function setupSubmitButton() {
   document.querySelector('#submit').addEventListener('click', () => {
-    document.querySelector('#unsolvable').classList.add('hidden');
+    const allManualInputs = document.querySelectorAll('.manualInput');
     const inputValArray = [];
-    const allInputs = document.querySelectorAll('input');
-    allInputs.forEach(input => {
+    allManualInputs.forEach(input => {
       if (input.value) {
         inputValArray.push(input.value);
       } else {
@@ -1105,27 +1108,42 @@ function setupSubmitButton() {
       }
     });
     const boardString = inputValArray.join('');
+    document.querySelector('#stringEntry').value = boardString;
     const solutionArray = solve(boardString);
     if (solutionArray) {
       solutionArray.forEach((cellVal, index) => {
         const inputBox = document.querySelector(`#row${Math.floor(index / 9)}col${index % 9}input`);
         if (!inputBox.value) {
           inputBox.classList.add('generated');
-          inputBox.value = cellVal;
+          inputBox.value = +cellVal;
         }
       });
+      document.querySelector('#solution').value = solutionArray.join('');
     } else {
-      document.querySelector('#unsolvable').classList.remove('hidden');
+      document.querySelector('#solution').value = 'Not a valid puzzle.'
     }
   });
 }
 
 function setupBadInputWarning() {
-  const allInputBoxes = document.querySelectorAll('input');
+  const allInputBoxes = document.querySelectorAll('.manualInput');
   allInputBoxes.forEach(box => {
     box.addEventListener('animationend', function() {
       this.classList.remove('warning'); 
     });
+  });
+}
+
+function setupStringEntry() {
+  document.querySelector('#stringEntry').addEventListener('input', function() {
+    const stringInput = this.value;
+    if (+stringInput.toString().length === 81 && Number.isInteger(+stringInput) && +stringInput > 0) {
+      +stringInput.toString().split('').forEach((valToInsert, index) => {
+        const cellInputBox = document.querySelector(`#row${Math.floor(index / 9)}col${index % 9}input`);
+        cellInputBox.classList.remove('generated');
+        cellInputBox.value = (+valToInsert === 0) ? '' : +valToInsert;
+      });
+    }
   });
 }
 
@@ -1134,9 +1152,11 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupClearButton);
     document.addEventListener('DOMContentLoaded', setupSubmitButton);
     document.addEventListener('DOMContentLoaded', setupBadInputWarning);
+    document.addEventListener('DOMContentLoaded', setupStringEntry);
 } else {
     setupBoard();
     setupClearButton();
     setupSubmitButton();
     setupBadInputWarning();
+    setupStringEntry();
 }
