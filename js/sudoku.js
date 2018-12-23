@@ -1013,6 +1013,9 @@ function setupBoard() {
       inputBox.addEventListener('focus', function() {
         this.select();
       });
+      inputBox.addEventListener('click', function() {
+        this.select();
+      });
 
       // force input to be integer between 1 and 9, move to next cell if good input is entered
       inputBox.addEventListener('input', function () {
