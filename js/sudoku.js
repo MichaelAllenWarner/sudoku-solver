@@ -1078,6 +1078,9 @@ function setupBoard() {
             document.querySelector(`#row0col${j}input`).focus();
           }
         }
+        if (event.key === 'Enter') {
+          document.querySelector('#submit').click();
+        }
       });
       currCell.appendChild(inputBox);
     }
@@ -1146,6 +1149,11 @@ function setupStringEntry() {
         cellInputBox.classList.remove('generated');
         cellInputBox.value = (+valToInsert === 0) ? '' : +valToInsert;
       });
+    }
+  });
+  document.querySelector('#stringEntry').addEventListener('keyup', function(event) {
+    if (event.key === 'Enter') {
+      document.querySelector('#submit').click();
     }
   });
   document.querySelector('#stringEntry').addEventListener('focus', function() {
