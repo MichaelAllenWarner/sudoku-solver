@@ -1125,7 +1125,7 @@ function setupSubmitButton() {
         const inputBox = document.querySelector(`#row${Math.floor(index / 9)}col${index % 9}input`);
         if (!inputBox.value) {
           inputBox.classList.add('generated');
-          inputBox.value = +cellVal;
+          inputBox.value = cellVal;
         }
       });
       document.querySelector('#solution').value = solutionArray.join('');
@@ -1147,12 +1147,12 @@ function setupBadInputWarning() {
 
 function setupStringEntry() {
   if (location.search) {
-    const stringInput = location.search.substring(1);
-    if (+stringInput.toString().length === 81 && Number.isInteger(+stringInput) && +stringInput > 0) {
-      +stringInput.toString().split('').forEach((valToInsert, index) => {
+    const stringInput = location.search.substring(1).replace(/[^0-9]/gi, '0');
+    if (stringInput.length === 81 && Number.isInteger(+stringInput) && +stringInput >= 0) {
+      stringInput.split('').forEach((valToInsert, index) => {
         const cellInputBox = document.querySelector(`#row${Math.floor(index / 9)}col${index % 9}input`);
         cellInputBox.classList.remove('generated');
-        cellInputBox.value = (+valToInsert === 0) ? '' : +valToInsert;
+        cellInputBox.value = (+valToInsert === 0) ? '' : valToInsert;
       });
       document.querySelector('#submit').click();
     } else {
@@ -1160,12 +1160,13 @@ function setupStringEntry() {
     }
   }
   document.querySelector('#stringEntry').addEventListener('input', function() {
-    const stringInput = this.value;
-    if (+stringInput.toString().length === 81 && Number.isInteger(+stringInput) && +stringInput > 0) {
-      +stringInput.toString().split('').forEach((valToInsert, index) => {
+    const stringInput = this.value.replace(/[^0-9]/gi, '0');
+    if (stringInput.length === 81 && Number.isInteger(+stringInput) && +stringInput >= 0) {
+      stringInput.split('').forEach((valToInsert, index) => {
+        this.value = stringInput;
         const cellInputBox = document.querySelector(`#row${Math.floor(index / 9)}col${index % 9}input`);
         cellInputBox.classList.remove('generated');
-        cellInputBox.value = (+valToInsert === 0) ? '' : +valToInsert;
+        cellInputBox.value = (+valToInsert === 0) ? '' : valToInsert;
       });
     }
   });
