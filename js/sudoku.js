@@ -947,8 +947,11 @@ function solve(boardString) {
       const changes7 = xWing(cellObjArray, groupObjArray);
       const changes8 = removePossValIfMustBeInDifferentRowOrCol(cellObjArray, groupObjArray);
       const changes9 = removePossValBecauseCellIsPartOfHiddenSubset(cellObjArray, groupObjArray);
-      const changes10 = singlesChaining(cellObjArray, groupObjArray);
-      if (changes1 || changes2 || changes3 || changes4 || changes5 || changes6 || changes7 || changes8 || changes9 || changes10) {
+      /* const changes10 = singlesChaining(cellObjArray, groupObjArray);
+      my singlesChaining is apparently buggy! It renders the following valid puzzle "invalid":
+      003200000040090000600008010200000003010006040007000500000001002090040060000500700
+      */
+      if (changes1 || changes2 || changes3 || changes4 || changes5 || changes6 || changes7 || changes8 || changes9 /*|| changes10*/ ) {
         anyChangesMade = true;
         runCellSelfUpdates(cellObjArray);
       } else {
