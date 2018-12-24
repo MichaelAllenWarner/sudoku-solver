@@ -1102,6 +1102,7 @@ function setupClearButton() {
     solutionStringBox.value = solutionStringBox.defaultValue;
     setupBoard();
     setupBadInputWarning();
+    history.pushState(null, null, location.pathname);
   });
 }
 
@@ -1129,8 +1130,9 @@ function setupSubmitButton() {
       });
       document.querySelector('#solution').value = solutionArray.join('');
     } else {
-      document.querySelector('#solution').value = 'Not a valid puzzle.'
+      document.querySelector('#solution').value = 'There are no solutions.'
     }
+    history.pushState(null, null, `?${boardString}`);
   });
 }
 
@@ -1144,6 +1146,19 @@ function setupBadInputWarning() {
 }
 
 function setupStringEntry() {
+  if (location.search) {
+    const stringInput = location.search.substring(1);
+    if (+stringInput.toString().length === 81 && Number.isInteger(+stringInput) && +stringInput > 0) {
+      +stringInput.toString().split('').forEach((valToInsert, index) => {
+        const cellInputBox = document.querySelector(`#row${Math.floor(index / 9)}col${index % 9}input`);
+        cellInputBox.classList.remove('generated');
+        cellInputBox.value = (+valToInsert === 0) ? '' : +valToInsert;
+      });
+      document.querySelector('#submit').click();
+    } else {
+      history.pushState(null, null, location.pathname);
+    }
+  }
   document.querySelector('#stringEntry').addEventListener('input', function() {
     const stringInput = this.value;
     if (+stringInput.toString().length === 81 && Number.isInteger(+stringInput) && +stringInput > 0) {
@@ -1162,13 +1177,7 @@ function setupStringEntry() {
   document.querySelector('#stringEntry').addEventListener('focus', function() {
     this.select();
   });
-  document.querySelector('#stringEntry').addEventListener('click', function() {
-    this.select();
-  });
   document.querySelector('#solution').addEventListener('focus', function() {
-    this.select();
-  });
-  document.querySelector('#solution').addEventListener('click', function() {
     this.select();
   });
 }
