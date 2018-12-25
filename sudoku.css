@@ -84,6 +84,7 @@ button[disabled] {
   font-family: monospace;
   font-size: 16px;
   width: 51em;
+  max-width: 70vw;
   margin: .5em auto;
 }
 
