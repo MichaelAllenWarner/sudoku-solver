@@ -1178,7 +1178,13 @@ function setupStringEntry() {
   document.querySelector('#stringEntry').addEventListener('focus', function() {
     this.select();
   });
+  document.querySelector('#stringEntry').addEventListener('click', function() {
+    this.select();
+  });
   document.querySelector('#solution').addEventListener('focus', function() {
+    this.select();
+  });
+  document.querySelector('#solution').addEventListener('click', function() {
     this.select();
   });
 }
