@@ -71,10 +71,10 @@ button[disabled] {
 
 #divBelowBoard {
   text-align: center;
+  display: grid;
 }
 
 #stringDiv {
-  width: fit-content;
   text-align: left;
   margin: auto;
 }
@@ -88,5 +88,5 @@ button[disabled] {
 }
 
 #buttons {
-  margin: 1.5em auto;
+  margin: 0 auto 1.5em auto;
 }
