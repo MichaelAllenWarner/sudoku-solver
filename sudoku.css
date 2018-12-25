@@ -52,6 +52,10 @@ button {
   margin: auto .5em;
 }
 
+button[disabled] {
+  color: darkgray;
+}
+
 @keyframes warningAnimation {
   from {outline-color: dodgerblue;}
   to {outline-color: crimson;}
@@ -67,6 +71,12 @@ button {
 
 #divBelowBoard {
   text-align: center;
+}
+
+#stringDiv {
+  width: fit-content;
+  text-align: left;
+  margin: auto;
 }
 
 #stringEntry, #solution {

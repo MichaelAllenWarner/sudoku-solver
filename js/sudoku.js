@@ -1103,6 +1103,7 @@ function setupClearButton() {
     setupBoard();
     setupBadInputWarning();
     history.pushState(null, null, window.location.href.split('?')[0]);
+    document.querySelector('#permalink').setAttribute('disabled', '');
   });
 }
 
@@ -1132,7 +1133,10 @@ function setupSubmitButton() {
     } else {
       document.querySelector('#solution').value = 'There are no solutions.'
     }
-    history.pushState(null, null, `?${boardString}`);
+    if (location.search.substring(1) !== boardString) {
+      history.pushState(null, null, window.location.href.split('?')[0]);
+      document.querySelector('#permalink').removeAttribute('disabled');
+    }
   });
 }
 
@@ -1160,6 +1164,8 @@ function setupStringEntry() {
     }
   }
   document.querySelector('#stringEntry').addEventListener('input', function() {
+    document.querySelector('#permalink').setAttribute('disabled', '');
+    history.pushState(null, null, window.location.href.split('?')[0]);
     const stringInput = this.value.replace(/[^0-9]/gi, '0');
     if (stringInput.length === 81 && Number.isInteger(+stringInput) && +stringInput >= 0) {
       stringInput.split('').forEach((valToInsert, index) => {
@@ -1168,6 +1174,7 @@ function setupStringEntry() {
         cellInputBox.classList.remove('generated');
         cellInputBox.value = (+valToInsert === 0) ? '' : valToInsert;
       });
+      document.querySelector('#permalink').removeAttribute('disabled');
     }
   });
   document.querySelector('#stringEntry').addEventListener('keyup', function(event) {
@@ -1189,16 +1196,27 @@ function setupStringEntry() {
   });
 }
 
+function setupPermalinkButton() {
+  document.querySelector('#permalink').addEventListener('click', () => {
+    const stringInput = document.querySelector('#stringEntry').value.replace(/[^0-9]/gi, '0');
+    if (stringInput.length === 81 && Number.isInteger(+stringInput) && +stringInput >= 0) {
+      history.pushState(null, null, `?${document.querySelector('#stringEntry').value}`);
+    }
+  });
+}
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', setupBoard);
     document.addEventListener('DOMContentLoaded', setupClearButton);
     document.addEventListener('DOMContentLoaded', setupSubmitButton);
     document.addEventListener('DOMContentLoaded', setupBadInputWarning);
     document.addEventListener('DOMContentLoaded', setupStringEntry);
+    document.addEventListener('DOMContentLoaded', setupPermalinkButton);
 } else {
     setupBoard();
     setupClearButton();
     setupSubmitButton();
     setupBadInputWarning();
     setupStringEntry();
+    setupPermalinkButton();
 }
