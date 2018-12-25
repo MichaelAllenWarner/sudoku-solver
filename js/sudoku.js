@@ -1102,7 +1102,7 @@ function setupClearButton() {
     solutionStringBox.value = solutionStringBox.defaultValue;
     setupBoard();
     setupBadInputWarning();
-    history.pushState(null, null, location.pathname);
+    history.pushState(null, null, window.location.href.split('?')[0]);
   });
 }
 
@@ -1156,7 +1156,7 @@ function setupStringEntry() {
       });
       document.querySelector('#submit').click();
     } else {
-      history.pushState(null, null, location.pathname);
+      history.pushState(null, null, window.location.href.split('?')[0]);
     }
   }
   document.querySelector('#stringEntry').addEventListener('input', function() {
