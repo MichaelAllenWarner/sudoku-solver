@@ -1,3 +1,5 @@
+// model:
+
 function solve(boardString) {
 
   class Cell {
@@ -255,7 +257,9 @@ function solve(boardString) {
 }
 
 
-function setupBoard() {
+// view/controller
+
+function setUpBoard() {
   const board = document.querySelector('table');
   for (let i = 0; i < 9; i++) {
     const currRow = board.insertRow(-1);
@@ -269,17 +273,17 @@ function setupBoard() {
       if (colClass) {
         currCell.classList.add(colClass);
       }
-      currCell.id = `row${i}col${j}`;
       const inputBox = document.createElement('input');
       inputBox.classList.add('manualInput');
       inputBox.id = `row${i}col${j}input`;
 
-      inputBox.addEventListener('focus', function() {
-        this.select();
-      });
-      inputBox.addEventListener('click', function() {
-        this.select();
-      });
+      // following commented out b/c select() may be problematic on mobile
+      // inputBox.addEventListener('focus', function() {
+      //   this.select();
+      // });
+      // inputBox.addEventListener('click', function() {
+      //   this.select();
+      // });
 
       // force input to be integer between 1 and 9, move to next cell if good input is entered
       inputBox.addEventListener('input', function () {
@@ -351,24 +355,33 @@ function setupBoard() {
   }
 }
 
-function setupClearButton() {
+function setUpBadInputWarning() {
+  const allInputBoxes = document.querySelectorAll('.manualInput');
+  allInputBoxes.forEach(box => {
+    box.addEventListener('animationend', function() {
+      this.classList.remove('warning'); 
+    });
+  });
+}
+
+function setUpClearButton() {
   document.querySelector('#clear').addEventListener('click', () => {
     const allRows = document.querySelectorAll('tr');
     allRows.forEach(row => {
       row.remove();
     });
+    setUpBoard();
+    setUpBadInputWarning();
     const stringEntryBox = document.querySelector('#stringEntry');
     stringEntryBox.value = stringEntryBox.defaultValue;
     const solutionStringBox = document.querySelector('#solution');
     solutionStringBox.value = solutionStringBox.defaultValue;
-    setupBoard();
-    setupBadInputWarning();
     history.pushState(null, null, window.location.href.split('?')[0]);
     document.querySelector('#permalink').setAttribute('disabled', '');
   });
 }
 
-function setupSubmitButton() {
+function setUpSubmitButton() {
   document.querySelector('#submit').addEventListener('click', () => {
     const allManualInputs = document.querySelectorAll('.manualInput');
     const inputValArray = [];
@@ -401,16 +414,7 @@ function setupSubmitButton() {
   });
 }
 
-function setupBadInputWarning() {
-  const allInputBoxes = document.querySelectorAll('.manualInput');
-  allInputBoxes.forEach(box => {
-    box.addEventListener('animationend', function() {
-      this.classList.remove('warning'); 
-    });
-  });
-}
-
-function setupStringEntry() {
+function setUpStringEntry() {
   if (location.search) {
     const stringInput = location.search.substring(1).replace(/[^0-9]/gi, '0');
     if (stringInput.length === 81 && Number.isInteger(+stringInput) && +stringInput >= 0) {
@@ -443,21 +447,22 @@ function setupStringEntry() {
       document.querySelector('#submit').click();
     }
   });
-  document.querySelector('#stringEntry').addEventListener('focus', function() {
-    this.select();
-  });
-  document.querySelector('#stringEntry').addEventListener('click', function() {
-    this.select();
-  });
-  document.querySelector('#solution').addEventListener('focus', function() {
-    this.select();
-  });
-  document.querySelector('#solution').addEventListener('click', function() {
-    this.select();
-  });
+  // following commented out b/c select() may be problematic on mobile
+  // document.querySelector('#stringEntry').addEventListener('focus', function() {
+  //   this.select();
+  // });
+  // document.querySelector('#stringEntry').addEventListener('click', function() {
+  //   this.select();
+  // });
+  // document.querySelector('#solution').addEventListener('focus', function() {
+  //   this.select();
+  // });
+  // document.querySelector('#solution').addEventListener('click', function() {
+  //   this.select();
+  // });
 }
 
-function setupPermalinkButton() {
+function setUpPermalinkButton() {
   document.querySelector('#permalink').addEventListener('click', () => {
     const stringInput = document.querySelector('#stringEntry').value.replace(/[^0-9]/gi, '0');
     if (stringInput.length === 81 && Number.isInteger(+stringInput) && +stringInput >= 0) {
@@ -467,17 +472,17 @@ function setupPermalinkButton() {
 }
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupBoard);
-    document.addEventListener('DOMContentLoaded', setupClearButton);
-    document.addEventListener('DOMContentLoaded', setupSubmitButton);
-    document.addEventListener('DOMContentLoaded', setupBadInputWarning);
-    document.addEventListener('DOMContentLoaded', setupStringEntry);
-    document.addEventListener('DOMContentLoaded', setupPermalinkButton);
+    document.addEventListener('DOMContentLoaded', setUpBoard);
+    document.addEventListener('DOMContentLoaded', setUpBadInputWarning);
+    document.addEventListener('DOMContentLoaded', setUpClearButton);
+    document.addEventListener('DOMContentLoaded', setUpSubmitButton);
+    document.addEventListener('DOMContentLoaded', setUpStringEntry);
+    document.addEventListener('DOMContentLoaded', setUpPermalinkButton);
 } else {
-    setupBoard();
-    setupClearButton();
-    setupSubmitButton();
-    setupBadInputWarning();
-    setupStringEntry();
-    setupPermalinkButton();
+    setUpBoard();
+    setUpBadInputWarning();
+    setUpClearButton();
+    setUpSubmitButton();
+    setUpStringEntry();
+    setUpPermalinkButton();
 }
