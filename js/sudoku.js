@@ -3,19 +3,22 @@
 function solve(boardString) {
 
   class Cell {
-    constructor(row, col, box, val) {
-      this.row = row;
-      this.col = col;
-      this.box = box;
+    constructor(id, val) {
+      this.id = id;
       this.val = (val) ? val : null;
       this.possVals = (val) ? [] : [1, 2, 3, 4, 5, 6, 7, 8, 9];
       this.rowTakenNumsContributor = false;
       this.colTakenNumsContributor = false;
       this.boxTakenNumsContributor = false;
     }
-
-    id() { // In hindsight, I probably should have made this a prop, and then made row/col/box the methods.
-      return 9 * (this.row) + (this.col);
+    row() {
+      return Math.floor(this.id / 9);
+    }
+    col() {
+      return this.id % 9;
+    }
+    box() {
+      return (3 * Math.floor(this.row() / 3)) + Math.floor(this.col() / 3);
     }
     selfUpdate() {
       if (!this.val && this.possVals.length === 1) {
@@ -30,6 +33,13 @@ function solve(boardString) {
     }
   }
 
+  const cellObjArray = [];
+  const boardArray = boardString.split('');
+  for (const [index, value] of boardArray.entries()) {
+    cellObjArray.push(new Cell(index, +value));
+  }
+
+
   class Group {
     constructor(groupType, num) {
       this.groupType = groupType;
@@ -41,24 +51,10 @@ function solve(boardString) {
       for (let i = 0; i < this.takenNums.length; i++) {
         if (nonDuplicates.includes(this.takenNums[i])) {
           return true;
-        } else {
-          nonDuplicates.push(this.takenNums[i]);
         }
+        nonDuplicates.push(this.takenNums[i]);
       }
     }
-  }
-
-
-  // make Cell and Group objects:
-
-  const cellObjArray = [];
-  const boardArray = boardString.split('');
-  for (const [index, value] of boardArray.entries()) {
-    const row = Math.floor(index / 9);
-    const col = (index % 9);
-    const box = (3 * Math.floor(row / 3)) + Math.floor(col / 3);
-    const val = +value;
-    cellObjArray.push(new Cell(row, col, box, val));
   }
 
   const groupObjArray = [];
@@ -68,17 +64,20 @@ function solve(boardString) {
     groupObjArray.push(new Group('box', num));
   }
 
+
   function attemptSolveAndReturnCurrBoardArray(cellObjArray, groupObjArray) {
 
     // 'technique' functions to narrow down cell possVals:
 
     function cellValsToAddToGroupTakenNums(cellObjArray, groupObjArray) {
-
       const pushesToMake = [];
 
       groupObjArray.forEach(groupObj => {
         cellObjArray.forEach(cellObj => {
-          if (cellObj[groupObj.groupType] === groupObj.num) {
+          const groupNumOfCell = (groupObj.groupType === 'row') ? cellObj.row()
+          : (groupObj.groupType === 'col') ? cellObj.col()
+          : cellObj.box();
+          if (groupNumOfCell === groupObj.num) {
             if (cellObj.val && !cellObj[`${groupObj.groupType}TakenNumsContributor`]) {
               pushesToMake.push([groupObj, cellObj]);
             }
@@ -92,35 +91,38 @@ function solve(boardString) {
     }
 
     function groupTakenNumsToRemoveFromCellPossVals(cellObjArray, groupObjArray) {
-
       const splicesToMake = [];
 
       groupObjArray.forEach(groupObj => {
         cellObjArray.forEach(cellObj => {
-          if (cellObj[groupObj.groupType] === groupObj.num) {
-            if (!cellObj.val) {
-              groupObj.takenNums.forEach(takenNum => {
-                if (cellObj.possVals.includes(takenNum)) {
-                  splicesToMake.push([cellObj, takenNum]);
-                }
-              });
-            }
+          const groupNumOfCell = (groupObj.groupType === 'row') ? cellObj.row()
+          : (groupObj.groupType === 'col') ? cellObj.col()
+          : cellObj.box();
+          if (groupNumOfCell === groupObj.num && !cellObj.val) {
+            groupObj.takenNums.forEach(takenNum => {
+              if (cellObj.possVals.includes(takenNum)) {
+                splicesToMake.push([cellObj, takenNum]);
+              }
+            });
           }
         });
       });
+
       if (splicesToMake.length > 0) {
         return splicesToMake;
       }
     }
 
     function uniquePossValsToMakeCellVals(cellObjArray, groupObjArray) {
-
       const valuesToSet = [];
 
       groupObjArray.forEach(groupObj => {
         const cellsInThisGroup = [];
         cellObjArray.forEach(cellObj => {
-          if (cellObj[groupObj.groupType] === groupObj.num) {
+          const groupNumOfCell = (groupObj.groupType === 'row') ? cellObj.row()
+          : (groupObj.groupType === 'col') ? cellObj.col()
+          : cellObj.box();
+          if (groupNumOfCell === groupObj.num) {
             cellsInThisGroup.push(cellObj);
           }
         });
@@ -154,25 +156,6 @@ function solve(boardString) {
     }
 
 
-    // contradiction-finding functions:
-
-    function groupContradictionChecker(groupObjArray) {
-      for (let i = 0; i < groupObjArray.length; i++) {
-        if (groupObjArray[i].checkForDuplicates()) {
-          return true;
-        }
-      }
-    }
-
-    function cellContradictionChecker(cellObjArray) {
-      for (let i = 0; i < cellObjArray.length; i++) {
-        if (cellObjArray[i].checkForNoPossValsLeft()) {
-          return true;
-        }
-      }
-    }
-
-
     // run the 'technique' functions until no further progress is made:
 
     let anyChangesMade;
@@ -197,7 +180,7 @@ function solve(boardString) {
           const cellObj = cellObjAndDigitPair[0];
           const digit = cellObjAndDigitPair[1];
           const indexToSplice = cellObj.possVals.findIndex(possVal => possVal === digit);
-          if (indexToSplice !== -1) {
+          if (indexToSplice !== -1) { // in case of duplicate elements in possValsToRemove array
             cellObj.possVals.splice(indexToSplice, 1);
           }
         });
@@ -218,8 +201,26 @@ function solve(boardString) {
           cellObj.selfUpdate();
         });
       }
-
     } while (anyChangesMade);
+
+
+    // contradiction-finding functions:
+
+    function groupContradictionChecker(groupObjArray) {
+      for (let i = 0; i < groupObjArray.length; i++) {
+        if (groupObjArray[i].checkForDuplicates()) {
+          return true;
+        }
+      }
+    }
+
+    function cellContradictionChecker(cellObjArray) {
+      for (let i = 0; i < cellObjArray.length; i++) {
+        if (cellObjArray[i].checkForNoPossValsLeft()) {
+          return true;
+        }
+      }
+    }
 
 
     // check for contradictions. If none found, return current state of board as an array:
@@ -229,28 +230,30 @@ function solve(boardString) {
     }
   }
 
+
   const currBoardArray = attemptSolveAndReturnCurrBoardArray(cellObjArray, groupObjArray);
 
   if (currBoardArray) { // no contradictions found
     if (!currBoardArray.includes(0)) { // puzzle is solved, return array of current board
       return currBoardArray;
-    } else { // not solved, start guessing (always using a cell with fewest possVals left)
-      const cellObjectsWithoutValue = [];
-      cellObjArray.forEach(cellObj => {
-        if (!cellObj.val) {
-          cellObjectsWithoutValue.push(cellObj);
-        }
-      });
-      cellObjectsWithoutValue.sort((a, b) => a.possVals.length - b.possVals.length);
-      const guessingCell = cellObjectsWithoutValue[0];
-      for (const [index, guess] of guessingCell.possVals.entries()) {
-        currBoardArray.splice(guessingCell.id(), 1, guess);
-        const guessArray = solve(currBoardArray.join('')); // recursive function
-        if (guessArray) { // puzzle is solved, return guessArray all the way up
-          return guessArray;
-        } else if (index === guessingCell.possVals.length - 1) { // only contradictions here, back up
-          return;
-        }
+    }
+    // else, start guessing (always using a cell with fewest possVals left):
+    const cellObjectsWithoutValue = [];
+    cellObjArray.forEach(cellObj => {
+      if (!cellObj.val) {
+        cellObjectsWithoutValue.push(cellObj);
+      }
+    });
+    cellObjectsWithoutValue.sort((a, b) => a.possVals.length - b.possVals.length);
+    const guessingCell = cellObjectsWithoutValue[0];
+    for (const [index, guess] of guessingCell.possVals.entries()) {
+      currBoardArray.splice(guessingCell.id, 1, guess);
+      const guessArray = solve(currBoardArray.join('')); // recursive function
+      if (guessArray) { // puzzle is solved, return guessArray all the way up
+        return guessArray;
+      }
+      if (index === guessingCell.possVals.length - 1) { // only contradictions here, back up
+        return;
       }
     }
   }
