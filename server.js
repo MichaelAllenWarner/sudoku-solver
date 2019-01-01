@@ -7,8 +7,4 @@ app.get('/', function (req, res) {
 
 app.use(express.static(`${__dirname}/public`));
 
-const port = process.env.PORT || 3000;
-
-app.listen(port, (() => {
-  console.log(`server is running on port ${port}`);
-})(port));
+app.listen(process.env.PORT || 3000);
