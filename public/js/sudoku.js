@@ -216,17 +216,17 @@ function setUpPermalinkButton() {
 }
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setUpBoard);
-    document.addEventListener('DOMContentLoaded', setUpBadInputWarning);
-    document.addEventListener('DOMContentLoaded', setUpClearButton);
-    document.addEventListener('DOMContentLoaded', setUpSubmitButton);
-    document.addEventListener('DOMContentLoaded', setUpStringEntry);
-    document.addEventListener('DOMContentLoaded', setUpPermalinkButton);
+  document.addEventListener('DOMContentLoaded', setUpBoard);
+  document.addEventListener('DOMContentLoaded', setUpBadInputWarning);
+  document.addEventListener('DOMContentLoaded', setUpClearButton);
+  document.addEventListener('DOMContentLoaded', setUpSubmitButton);
+  document.addEventListener('DOMContentLoaded', setUpStringEntry);
+  document.addEventListener('DOMContentLoaded', setUpPermalinkButton);
 } else {
-    setUpBoard();
-    setUpBadInputWarning();
-    setUpClearButton();
-    setUpSubmitButton();
-    setUpStringEntry();
-    setUpPermalinkButton();
+  setUpBoard();
+  setUpBadInputWarning();
+  setUpClearButton();
+  setUpSubmitButton();
+  setUpStringEntry();
+  setUpPermalinkButton();
 }
