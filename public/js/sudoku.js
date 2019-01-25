@@ -1,3 +1,11 @@
+setUpBoard();
+setUpBadInputWarning();
+setUpClearButton();
+setUpSubmitButton();
+setUpStringEntry();
+setUpPermalinkButton();
+
+
 function setUpBoard() {
   const board = document.querySelector('table');
   for (let i = 0; i < 9; i++) {
@@ -213,20 +221,4 @@ function setUpPermalinkButton() {
       history.pushState(null, null, `?${document.querySelector('#stringEntry').value}`);
     }
   });
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', setUpBoard);
-  document.addEventListener('DOMContentLoaded', setUpBadInputWarning);
-  document.addEventListener('DOMContentLoaded', setUpClearButton);
-  document.addEventListener('DOMContentLoaded', setUpSubmitButton);
-  document.addEventListener('DOMContentLoaded', setUpStringEntry);
-  document.addEventListener('DOMContentLoaded', setUpPermalinkButton);
-} else {
-  setUpBoard();
-  setUpBadInputWarning();
-  setUpClearButton();
-  setUpSubmitButton();
-  setUpStringEntry();
-  setUpPermalinkButton();
 }

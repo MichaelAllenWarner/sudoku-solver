@@ -72,10 +72,7 @@ function solve(boardString) {
 
       groupObjArray.forEach(groupObj => {
         cellObjArray.forEach(cellObj => {
-          const groupNumOfCell = (groupObj.groupType === 'row') ? cellObj.row()
-          : (groupObj.groupType === 'col') ? cellObj.col()
-          : cellObj.box();
-          if (groupNumOfCell === groupObj.num) {
+          if (cellObj[groupObj.groupType]() === groupObj.num) {
             if (cellObj.val && !cellObj[`${groupObj.groupType}TakenNumsContributor`]) {
               pushesToMake.push([groupObj, cellObj]);
             }
@@ -93,10 +90,7 @@ function solve(boardString) {
 
       groupObjArray.forEach(groupObj => {
         cellObjArray.forEach(cellObj => {
-          const groupNumOfCell = (groupObj.groupType === 'row') ? cellObj.row()
-          : (groupObj.groupType === 'col') ? cellObj.col()
-          : cellObj.box();
-          if (groupNumOfCell === groupObj.num && !cellObj.val) {
+          if (cellObj[groupObj.groupType]() === groupObj.num && !cellObj.val) {
             groupObj.takenNums.forEach(takenNum => {
               if (cellObj.possVals.includes(takenNum)) {
                 splicesToMake.push([cellObj, takenNum]);
@@ -117,10 +111,7 @@ function solve(boardString) {
       groupObjArray.forEach(groupObj => {
         const cellsInThisGroup = [];
         cellObjArray.forEach(cellObj => {
-          const groupNumOfCell = (groupObj.groupType === 'row') ? cellObj.row()
-          : (groupObj.groupType === 'col') ? cellObj.col()
-          : cellObj.box();
-          if (groupNumOfCell === groupObj.num) {
+          if (cellObj[groupObj.groupType]() === groupObj.num) {
             cellsInThisGroup.push(cellObj);
           }
         });
