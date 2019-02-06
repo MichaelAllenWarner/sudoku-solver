@@ -2,9 +2,10 @@
   "name": "sudoku",
   "version": "1.0.0",
   "description": "Mike's Sudoku Solver",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
     "start": "node server.js"
   },
   "repository": {
@@ -22,5 +23,12 @@
   },
   "engines": {
     "node": "11.6.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.3.1",
+    "babel-loader": "^8.0.5",
+    "webpack": "^4.29.1",
+    "webpack-cli": "^3.2.3"
   }
 }
