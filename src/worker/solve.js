@@ -24,7 +24,7 @@ export default function solve(boardString) {
     else {
       const guessingCell = chooseGuessingCell(cellObjArray);
 
-      for (const [index, guess] of guessingCell.possVals.entries()) {
+      for (const guess of guessingCell.possVals) {
         currBoardArray.splice(guessingCell.id, 1, guess);
 
         // try to solve with guess (recursive function call)

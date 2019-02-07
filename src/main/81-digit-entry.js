@@ -48,7 +48,7 @@ export default function setUp81DigitEntry() {
       && +stringInput >= 0);
   }
 
-  function fillBoard(stringInput, fromUrlBarOrStringEntry) {
+  function fillBoard(stringInput) {
     stringInput.split('').forEach((valToInsert, index) => {
       const row = Math.floor(index / 9);
       const col = index % 9;

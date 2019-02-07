@@ -43,7 +43,7 @@ export default function setUpBoard() {
           document.querySelector(`#row${i+1}col0input`).focus();
         }
         else {
-          document.querySelector(`#row0col0input`).focus();
+          document.querySelector('#row0col0input').focus();
         }
       });
 
@@ -57,7 +57,7 @@ export default function setUpBoard() {
             document.querySelector(`#row${i+1}col0input`).focus();
           }
           else {
-            document.querySelector(`#row0col0input`).focus();
+            document.querySelector('#row0col0input').focus();
           }
         }
         if (event.key === 'ArrowLeft' || event.key === 'Left' || event.key === 'Backspace') {
@@ -68,7 +68,7 @@ export default function setUpBoard() {
             document.querySelector(`#row${i-1}col8input`).focus();
           }
           else {
-            document.querySelector(`#row8col8input`).focus();
+            document.querySelector('#row8col8input').focus();
           }
         }
         if (event.key === 'ArrowUp' || event.key === 'Up') {

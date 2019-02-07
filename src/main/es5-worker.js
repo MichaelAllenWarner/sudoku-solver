@@ -1,4 +1,4 @@
-const solveWorker = new Worker('js/worker.js');
+const solveWorker = new Worker('js/es5-worker.js');
 
 solveWorker.onmessage = function(event) {
   const solutionBox = document.querySelector('#solution');

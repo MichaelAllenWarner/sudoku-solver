@@ -6,4 +6,4 @@ onmessage = function(event) {
     boardString: event.data,
     solutionArray
   });
-}
+};
