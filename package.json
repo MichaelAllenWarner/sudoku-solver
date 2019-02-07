@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/MichaelAllenWarner/sudoku-solver#readme",
   "dependencies": {
+    "@babel/polyfill": "^7.2.5",
     "express": "^4.16.4"
   },
   "engines": {
