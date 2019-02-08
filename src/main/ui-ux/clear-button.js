@@ -1,4 +1,4 @@
-export default function setUpClearButton(setUpBoard, setUpBadInputWarning) {
+export default (setUpBoard, setUpBadInputWarning) => {
 
   const handleClick = () => {
     const allRows = document.querySelectorAll('tr');
@@ -22,4 +22,4 @@ export default function setUpClearButton(setUpBoard, setUpBadInputWarning) {
   const clear = document.querySelector('#clear');
 
   clear.addEventListener('click', handleClick);
-}
+};

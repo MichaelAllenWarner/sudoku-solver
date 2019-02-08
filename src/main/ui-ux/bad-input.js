@@ -1,8 +1,8 @@
-export default function setUpBadInputWarning() {
+export default () => {
   const allInputBoxes = document.querySelectorAll('.manualInput');
   allInputBoxes.forEach(box => {
     box.addEventListener('animationend', function() {
       this.classList.remove('warning'); 
     });
   });
-}
+};

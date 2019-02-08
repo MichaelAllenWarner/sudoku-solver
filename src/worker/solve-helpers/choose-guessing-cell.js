@@ -1,6 +1,6 @@
 // choose a cell with no value and with fewest possVals left
 
-export default function chooseGuessingCell(cellObjArray) {
+export default cellObjArray => {
   const cellObjectsWithoutValue = [];
   cellObjArray.forEach(cellObj => {
     if (!cellObj.val) {
@@ -9,4 +9,4 @@ export default function chooseGuessingCell(cellObjArray) {
   });
   cellObjectsWithoutValue.sort((a, b) => a.possVals.length - b.possVals.length);
   return cellObjectsWithoutValue[0];
-}
+};

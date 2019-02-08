@@ -9,7 +9,7 @@ import {
   cellContradictionChecker
 } from './tht-helpers/contradiction-checkers';
 
-export default function tryHumanTechniques(cellObjArray, groupObjArray) {
+export default (cellObjArray, groupObjArray) => {
 
   // run the 'human technique' functions until no further progress is made:
   let anyChangesMade;
@@ -29,4 +29,4 @@ export default function tryHumanTechniques(cellObjArray, groupObjArray) {
   if (!groupContradictionChecker(groupObjArray) && !cellContradictionChecker(cellObjArray)) {
     return cellObjArray.map(cellObj => cellObj.val || 0);
   }
-}
+};
