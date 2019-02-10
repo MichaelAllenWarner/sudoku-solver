@@ -1,8 +1,8 @@
 export default () => {
   const allInputBoxes = document.querySelectorAll('.manualInput');
-  allInputBoxes.forEach(box => {
+  for (const box of allInputBoxes) {
     box.addEventListener('animationend', function() {
       this.classList.remove('warning'); 
     });
-  });
+  }
 };

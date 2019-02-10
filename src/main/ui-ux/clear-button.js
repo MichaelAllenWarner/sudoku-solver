@@ -2,9 +2,9 @@ export default (setUpBoard, setUpBadInputWarning) => {
 
   const handleClick = () => {
     const allRows = document.querySelectorAll('tr');
-    allRows.forEach(row => {
+    for (const row of allRows) {
       row.remove();
-    });
+    }
 
     setUpBoard();
     setUpBadInputWarning();
@@ -16,10 +16,11 @@ export default (setUpBoard, setUpBadInputWarning) => {
     solutionStringBox.value = solutionStringBox.defaultValue;
 
     history.pushState(null, null, window.location.href.split('?')[0]);
-    document.querySelector('#permalink').setAttribute('disabled', '');
+
+    const permalink = document.querySelector('#permalink');
+    permalink.setAttribute('disabled', '');
   };
 
   const clear = document.querySelector('#clear');
-
   clear.addEventListener('click', handleClick);
 };

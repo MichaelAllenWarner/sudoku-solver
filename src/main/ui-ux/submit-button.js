@@ -8,13 +8,15 @@ export default solveWorker => {
     // create a boardString to send to solveWorker
     const allManualInputs = document.querySelectorAll('.manualInput');
     const inputValArray = [];
-    allManualInputs.forEach(input => {
+
+    for (const input of allManualInputs) {
       if (input.value) {
         inputValArray.push(input.value);
       } else {
         inputValArray.push(0);
       }
-    });
+    }
+
     const boardString = inputValArray.join('');
 
     // make sure the string entry box has the right 81-digit string
@@ -27,5 +29,5 @@ export default solveWorker => {
 
     // solve!
     solveWorker.postMessage(boardString);
-  };
+  }
 };

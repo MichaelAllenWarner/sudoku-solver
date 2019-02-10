@@ -3,9 +3,7 @@ export default class Cell {
     this.id = id;
     this.val = (val) ? val : null;
     this.possVals = (val) ? [] : [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    this.rowTakenNumsContributor = false;
-    this.colTakenNumsContributor = false;
-    this.boxTakenNumsContributor = false;
+    this.isAccountedForInGroupTakenNums = false;
   }
   row() {
     return Math.floor(this.id / 9);

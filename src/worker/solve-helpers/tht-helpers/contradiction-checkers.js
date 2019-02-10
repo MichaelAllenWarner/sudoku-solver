@@ -1,16 +1,16 @@
 export { groupContradictionChecker, cellContradictionChecker };
 
 function groupContradictionChecker(groupObjArray) {
-  for (let i = 0; i < groupObjArray.length; i++) {
-    if (groupObjArray[i].checkForDuplicates()) {
+  for (const groupObj of groupObjArray) {
+    if (groupObj.checkForDuplicates()) {
       return true;
     }
   }
 }
 
 function cellContradictionChecker(cellObjArray) {
-  for (let i = 0; i < cellObjArray.length; i++) {
-    if (cellObjArray[i].checkForNoPossValsLeft()) {
+  for (const cellObj of cellObjArray) {
+    if (cellObj.checkForNoPossValsLeft()) {
       return true;
     }
   }

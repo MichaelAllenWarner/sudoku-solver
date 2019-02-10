@@ -9,8 +9,9 @@ solveWorker.onmessage = function(event) {
   const puzzleIsSolved = solutionArray ? true : false;
 
   if (puzzleIsSolved) {
+
     // fill board with solution
-    solutionArray.forEach((cellVal, index) => {
+    for (const [index, cellVal] of solutionArray.entries()) {
       const row = Math.floor(index / 9);
       const col = index % 9;
       const inputBox = document.querySelector(`#row${row}col${col}input`);
@@ -18,7 +19,7 @@ solveWorker.onmessage = function(event) {
         inputBox.classList.add('generated');
         inputBox.value = cellVal;
       }
-    });
+    }
 
     const solutionString = solutionArray.join('');
     solutionBox.value = solutionString;

@@ -13,20 +13,24 @@ export default (cellObjArray, groupObjArray) => {
 
   // run the 'human technique' functions until no further progress is made:
   let anyChangesMade;
+
   do {
-    anyChangesMade = false;
-    if (addValsToTakenNums(cellObjArray, groupObjArray)
-        || removeTakenNumsFromPossVals(cellObjArray, groupObjArray)
-        || makeUniquePossValsCellVals(cellObjArray, groupObjArray)) {
-      anyChangesMade = true;
-      cellObjArray.forEach(cellObj => {
+    anyChangesMade = (addValsToTakenNums(cellObjArray, groupObjArray)
+      || removeTakenNumsFromPossVals(cellObjArray, groupObjArray)
+      || makeUniquePossValsCellVals(cellObjArray, groupObjArray));
+
+    if (anyChangesMade) {
+      for (const cellObj of cellObjArray) {
         cellObj.moveLastRemainingPossValToVal();
-      });
+      }
     }
   } while (anyChangesMade);
 
   // check for contradictions. If none found, return current state of board as an array:
-  if (!groupContradictionChecker(groupObjArray) && !cellContradictionChecker(cellObjArray)) {
+  const puzzleMayBeValid = (!groupContradictionChecker(groupObjArray)
+    && !cellContradictionChecker(cellObjArray));
+
+  if (puzzleMayBeValid) {
     return cellObjArray.map(cellObj => cellObj.val || 0);
   }
 };

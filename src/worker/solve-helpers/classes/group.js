@@ -6,11 +6,11 @@ export default class Group {
   }
   checkForDuplicates() { // indicates a contradiction / invalid board
     const nonDuplicates = [];
-    for (let i = 0; i < this.takenNums.length; i++) {
-      if (nonDuplicates.includes(this.takenNums[i])) {
+    for (const num of this.takenNums) {
+      if (nonDuplicates.includes(num)) {
         return true;
       }
-      nonDuplicates.push(this.takenNums[i]);
+      nonDuplicates.push(num);
     }
   }
 }
