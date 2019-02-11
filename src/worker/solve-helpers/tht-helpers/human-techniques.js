@@ -19,11 +19,11 @@ function addValsToTakenNums(cellObjArray, groupObjArray) {
     const containingGroups = [];
 
     for (const groupObj of groupObjArray) {
-      if (containingGroups.length === 3) {
-        break;
-      }
       if (cellObj[groupObj.groupType]() === groupObj.num) {
         containingGroups.push(groupObj);
+        if (containingGroups.length === 3) {
+          break;
+        }
       }
     }
 
@@ -58,16 +58,16 @@ function removeTakenNumsFromPossVals(cellObjArray, groupObjArray) {
     const qualContainingGroups = [];
 
     for (const groupObj of groupObjArray) {
-      if (qualContainingGroups.length === 3) {
-        break;
-      }
       if (cellObj[groupObj.groupType]() === groupObj.num
         && groupObj.takenNums.length > 0) {
         qualContainingGroups.push(groupObj);
+        if (qualContainingGroups.length === 3) {
+          break;
+        }
       }
     }
 
-    // push cell / takenNum pairs to cellAndTakenNumPairs
+    // push cell/takenNum pairs to cellAndTakenNumPairs
     if (qualContainingGroups.length > 0) {
       for (const groupObj of qualContainingGroups) {
         for (const takenNum of groupObj.takenNums) {

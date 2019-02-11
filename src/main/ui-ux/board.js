@@ -1,13 +1,19 @@
+import {
+  generateCellInputHandler,
+  generateCellKeydownHandler
+} from '../utils/cell-event-handlers';
+
+
 export default () => {
+
   const board = document.querySelector('table');
 
   for (let i = 0; i < 9; i++) {
     const currRow = board.insertRow(-1);
+    const rowClass = (i % 3 === 0) ? 'top' : (i % 3 === 2) ? 'bottom' : null;
 
     for (let j = 0; j < 9; j++) {
       const currCell = currRow.insertCell(-1);
-
-      const rowClass = (i % 3 === 0) ? 'top' : (i % 3 === 2) ? 'bottom' : null;
       const colClass = (j % 3 === 0) ? 'left' : (j % 3 === 2) ? 'right' : null;
 
       if (rowClass) {
@@ -22,79 +28,11 @@ export default () => {
       inputBox.classList.add('manualInput');
       inputBox.id = `row${i}col${j}input`;
 
-      // force input to be integer between 1 and 9, move to next cell if good input is entered
-      inputBox.addEventListener('input', function () {
-        if (!this.value) {
-          return;
-        }
+      const handleInput = generateCellInputHandler(i, j);
+      const handleKeydown = generateCellKeydownHandler(i, j);
 
-        if (!Number.isInteger(+this.value) || +this.value < 1 || +this.value > 9) {
-          this.value = '';
-          this.classList.add('warning');
-          return;
-        }
-
-        this.classList.remove('generated'); // in case changing a "solution" cell from a prior solve
-
-        this.value = this.value.trim().slice(0,1); // in case something like " 3.0" was copy-pasted
-
-        if (j !== 8) {
-          document.querySelector(`#row${i}col${j+1}input`).focus();
-        }
-        else if (i !== 8) {
-          document.querySelector(`#row${i+1}col0input`).focus();
-        }
-        else {
-          document.querySelector('#row0col0input').focus();
-        }
-      });
-
-      // board navigation controls:
-      inputBox.addEventListener('keyup', function(event) {
-        if (event.key === 'ArrowRight' || event.key === 'Right') {
-          if (j !== 8) {
-            document.querySelector(`#row${i}col${j+1}input`).focus();
-          }
-          else if (i !== 8) {
-            document.querySelector(`#row${i+1}col0input`).focus();
-          }
-          else {
-            document.querySelector('#row0col0input').focus();
-          }
-        }
-
-        if (event.key === 'ArrowLeft' || event.key === 'Left' || event.key === 'Backspace') {
-          if (j !== 0) {
-            document.querySelector(`#row${i}col${j-1}input`).focus();
-          }
-          else if (i !== 0) {
-            document.querySelector(`#row${i-1}col8input`).focus();
-          }
-          else {
-            document.querySelector('#row8col8input').focus();
-          }
-        }
-
-        if (event.key === 'ArrowUp' || event.key === 'Up') {
-          if (i !== 0) {
-            document.querySelector(`#row${i-1}col${j}input`).focus();
-          } else {
-            document.querySelector(`#row8col${j}input`).focus();
-          }
-        }
-
-        if (event.key === 'ArrowDown' || event.key === 'Down') {
-          if (i !== 8) {
-            document.querySelector(`#row${i+1}col${j}input`).focus();
-          } else {
-            document.querySelector(`#row0col${j}input`).focus();
-          }
-        }
-
-        if (event.key === 'Enter') {
-          document.querySelector('#submit').click();
-        }
-      });
+      inputBox.addEventListener('input', handleInput);
+      inputBox.addEventListener('keydown', handleKeydown);
 
       currCell.appendChild(inputBox);
     }

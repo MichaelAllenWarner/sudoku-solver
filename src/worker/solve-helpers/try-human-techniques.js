@@ -9,6 +9,7 @@ import {
   cellContradictionChecker
 } from './tht-helpers/contradiction-checkers';
 
+
 export default (cellObjArray, groupObjArray) => {
 
   // run the 'human technique' functions until no further progress is made:

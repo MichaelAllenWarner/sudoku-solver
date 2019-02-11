@@ -9,7 +9,11 @@ export default () => {
 
     // if 'query param' is a valid puzzle, fill the board and try to solve
     if (isStringAPuzzle(stringInput)) {
-      fillBoardFromString(stringInput);
+
+      const stringWithZeroes = stringInput.replace(/[^0-9]/gi, '0');
+      history.pushState(null, null, '?' + stringWithZeroes);
+
+      fillBoardFromString(stringWithZeroes);
 
       const submit = document.querySelector('#submit');
       submit.click();
