@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = [
   {
-    entry: './src/main/es5-index.js',
+    entry: './src/main/index.js',
     output: {
       filename: 'es5-main.js',
       path: path.resolve(__dirname, 'public/js')
@@ -20,7 +20,7 @@ module.exports = [
                   useBuiltIns: 'usage',
                   debug: true,
                   targets: {
-                    browsers: ['> 1%']
+                    browsers: ['IE >= 10']
                   }
                 }]
               ]
@@ -49,7 +49,7 @@ module.exports = [
                   useBuiltIns: 'usage',
                   debug: true,
                   targets: {
-                    browsers: ['> 1%']
+                    browsers: ['IE >= 10']
                   }
                 }]
               ]
