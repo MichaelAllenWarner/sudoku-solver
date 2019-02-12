@@ -2,6 +2,7 @@ import { solveWorker } from './worker';
 
 // any changes made below must ALSO be made in 'es5-index.js'
 
+import setUpWorkerMessageHandler from './utils/worker-onmessage-handler';
 import setUpBoard from './ui-ux/board';
 import setUpBadInputWarning from './ui-ux/bad-input';
 import setUpClearButton from './ui-ux/clear-button';
@@ -10,6 +11,7 @@ import setUp81DigitEntryFromQueryParam from './ui-ux/81-digit-entry-from-query-p
 import setUp81DigitEntryFromInputBox from './ui-ux/81-digit-entry-from-input-box';
 import setUpPermalinkButton from './ui-ux/permalink-button';
 
+setUpWorkerMessageHandler(solveWorker);
 setUpBoard();
 setUpBadInputWarning();
 setUpClearButton(setUpBoard, setUpBadInputWarning);
