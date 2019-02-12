@@ -1,9 +1,9 @@
 export default (setUpBoard, setUpBadInputWarning) => {
 
   const handleClick = () => {
-    const allRows = document.querySelectorAll('tr');
-    for (const row of allRows) {
-      row.remove();
+    const board = document.querySelector('table');
+    while (board.firstChild) {
+      board.removeChild(board.firstChild);
     }
 
     setUpBoard();
