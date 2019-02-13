@@ -31,15 +31,15 @@ export default () => {
       solutionBox.value = 'There are no solutions.';
     }
 
-    // if 'query param' in URL bar doesn't match input boardString,
-    // clear it and enable permalink button
+    // if 'query param' exists and doesn't match input boardString, clear it
     const boardString = event.data.boardString;
-    if (location.search.substring(1) !== boardString) {
+    if (location.search && location.search.substring(1) !== boardString) {
       history.pushState(null, null, window.location.href.split('?')[0]);
-
-      const permalink = document.querySelector('#permalink');
-      permalink.removeAttribute('disabled');
     }
+
+    // enable permalink button
+    const permalink = document.querySelector('#permalink');
+    permalink.removeAttribute('disabled');
   };
 
   return solveWorker;

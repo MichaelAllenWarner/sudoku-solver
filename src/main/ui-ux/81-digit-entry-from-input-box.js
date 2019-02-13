@@ -12,8 +12,10 @@ export default () => {
     const permalink = document.querySelector('#permalink');
     permalink.setAttribute('disabled', '');
 
-    // clear 'query param' (b/c if they matched before, they don't now)
-    history.pushState(null, null, window.location.href.split('?')[0]);
+    // clear 'query param' if exists (b/c if they matched before, they don't now)
+    if (location.search) {
+      history.pushState(null, null, window.location.href.split('?')[0]);
+    }
 
     const stringInput = this.value;
 

@@ -1,5 +1,4 @@
 import setUpBoard from './ui-ux/board';
-import setUpBadInputWarning from './ui-ux/bad-input';
 import setUpClearButton from './ui-ux/clear-button';
 import setUpSubmitButton from './ui-ux/submit-button';
 import setUp81DigitEntryFromQueryParam from './ui-ux/81-digit-entry-from-query-param';
@@ -8,8 +7,7 @@ import setUpPermalinkButton from './ui-ux/permalink-button';
 
 export default solveWorker => {
   setUpBoard();
-  setUpBadInputWarning();
-  setUpClearButton(setUpBoard, setUpBadInputWarning);
+  setUpClearButton(setUpBoard);
   setUpSubmitButton(solveWorker);
   setUp81DigitEntryFromQueryParam();
   setUp81DigitEntryFromInputBox();

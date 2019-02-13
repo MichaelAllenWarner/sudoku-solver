@@ -25,6 +25,9 @@ export default () => {
       }
 
       const inputBox = document.createElement('input');
+      inputBox.setAttribute('type', 'number');
+      inputBox.setAttribute('min', '1');
+      inputBox.setAttribute('max', '9');
       inputBox.classList.add('manualInput');
       inputBox.id = `row${i}col${j}input`;
 

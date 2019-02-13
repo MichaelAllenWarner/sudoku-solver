@@ -1,4 +1,4 @@
-export default (setUpBoard, setUpBadInputWarning) => {
+export default setUpBoard => {
 
   const handleClick = () => {
     const board = document.querySelector('table');
@@ -7,7 +7,6 @@ export default (setUpBoard, setUpBadInputWarning) => {
     }
 
     setUpBoard();
-    setUpBadInputWarning();
 
     const stringEntryBox = document.querySelector('#stringEntry');
     stringEntryBox.value = stringEntryBox.defaultValue;
@@ -15,7 +14,9 @@ export default (setUpBoard, setUpBadInputWarning) => {
     const solutionStringBox = document.querySelector('#solution');
     solutionStringBox.value = solutionStringBox.defaultValue;
 
-    history.pushState(null, null, window.location.href.split('?')[0]);
+    if (location.search) {
+      history.pushState(null, null, window.location.href.split('?')[0]);
+    }
 
     const permalink = document.querySelector('#permalink');
     permalink.setAttribute('disabled', '');

@@ -14,16 +14,15 @@ function generateCellInputHandler(row, col) {
       || inputNum < 1
       || inputNum > 9;
 
-    // if input is bad, clear input and give warning
+    // if input is bad, clear input
     if (inputIsBad) {
       this.value = '';
-      this.classList.add('warning');
     }
 
-    // if input is good, make sure cell has right format and move to next cell
+    // if input is good, make sure it has right format and move to next cell
     else {
 
-      // reformat to plain integer (in case something like " 3.0" was copy-pasted)
+      // reformat to plain integer (in case something like " 3.0" or "2e0" was copy-pasted)
       this.value = input.trim().slice(0, 1);
 
       // in case changing a "solution" cell from a prior solve
@@ -77,6 +76,9 @@ function generateCellKeydownHandler(row, col) {
 
       case 'ArrowUp':
       case 'Up':
+        // prevent browser from incrementing number value
+        event.preventDefault();
+
         if (row !== 0) {
           focusOnCell(row - 1, col);
         } else {
@@ -86,6 +88,9 @@ function generateCellKeydownHandler(row, col) {
 
       case 'ArrowDown':
       case 'Down':
+        // prevent browser from decrementing number value
+        event.preventDefault();
+
         if (row !== 8) {
           focusOnCell(row + 1, col);
         } else {
