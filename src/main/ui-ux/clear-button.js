@@ -1,4 +1,6 @@
-export default setUpBoard => {
+import setUpBoard from './board.js';
+
+export default () => {
 
   const handleClick = () => {
     const board = document.querySelector('table');

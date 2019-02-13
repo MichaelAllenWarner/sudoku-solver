@@ -7,7 +7,7 @@ import setUpPermalinkButton from './ui-ux/permalink-button';
 
 export default solveWorker => {
   setUpBoard();
-  setUpClearButton(setUpBoard);
+  setUpClearButton();
   setUpSubmitButton(solveWorker);
   setUp81DigitEntryFromQueryParam();
   setUp81DigitEntryFromInputBox();
