@@ -5,21 +5,20 @@ function addValsToTakenNums(cellObjArray, groupObjArray) {
 
   for (const cellObj of cellObjArray) {
 
-    // skip cell if it has no value or is already 'accounted for'
     if (!cellObj.val || cellObj.isAccountedForInGroupTakenNums) {
       continue;
+    } else {
+      cellObj.isAccountedForInGroupTakenNums = true;
     }
-
-    // mark cellObj 'accounted for'
-    cellObj.isAccountedForInGroupTakenNums = true;
 
     const groupContainsCell = groupObj => cellObj[groupObj.groupType]() === groupObj.num;
     const pushGroupAndVal = groupObj => {
       groupAndCellValPairs.push([groupObj, cellObj.val]);
     };
 
-    // get 3 containing groups, push each [groupObj, cellObj.val] to groupAndCellValPairs
-    groupObjArray.filter(groupContainsCell).forEach(pushGroupAndVal);
+    groupObjArray
+      .filter(groupContainsCell)
+      .forEach(pushGroupAndVal);
   }
 
   if (groupAndCellValPairs.length > 0) {
@@ -51,8 +50,9 @@ function removeTakenNumsFromPossVals(cellObjArray, groupObjArray) {
       }
     };
 
-    // get containing groups w/ takenNums, push each [cellObj, takenNum] to cellAndTakenNumPairs
-    groupObjArray.filter(groupContainsCellAndHasTakenNums).forEach(pushCellAndTakenNums);
+    groupObjArray
+      .filter(groupContainsCellAndHasTakenNums)
+      .forEach(pushCellAndTakenNums);
   }
 
   if (cellAndTakenNumPairs.length > 0) {
@@ -73,16 +73,12 @@ function makeUniquePossValsCellVals(cellObjArray, groupObjArray) {
 
     const cellsInThisGroup = [];
 
-    // this will be an array of possVals that appear only once in this group:
-    let uniqueVals;
-
     // we'll use these 2 'working' arrays to determine which possVals are unique:
     const candidateUniqueVals = [];
     const ruledOutVals = [];
 
     for (const cellObj of cellObjArray) {
 
-      // if cell is in group, push to cellsInThisGroup (if not, skip it)
       if (cellObj[groupObj.groupType]() === groupObj.num) {
         cellsInThisGroup.push(cellObj);
       } else {
@@ -92,7 +88,6 @@ function makeUniquePossValsCellVals(cellObjArray, groupObjArray) {
       if (cellObj.possVals.length > 0) {
         for (const possVal of cellObj.possVals) {
 
-          // if possVal is already ruled out, skip it
           if (ruledOutVals.includes(possVal)) {
             continue;
           }
@@ -106,24 +101,22 @@ function makeUniquePossValsCellVals(cellObjArray, groupObjArray) {
 
           // if possVal IS already in candidateUniqueVals, rule it out
           else {
-            candidateUniqueVals.splice(possValIndex, 1);
+            delete candidateUniqueVals[possValIndex];
             ruledOutVals.push(possVal);
           }
         }
       }
     }
 
-    // candidateUniqueVals are all now actually unique
-    uniqueVals = candidateUniqueVals;
-
-    // push each [cellWithUniqueVal, uniqueVal] to cellAndUniqueValPairs
-    for (const uniqueVal of uniqueVals) {
-
+    const pushCellAndUniqueVal = uniqueVal => {
       const cellWithUniqueVal = cellsInThisGroup.find(cellObj =>
         cellObj.possVals.includes(uniqueVal));
-
       cellAndUniqueValPairs.push([cellWithUniqueVal, uniqueVal]);
-    }
+    };
+
+    candidateUniqueVals
+      .filter(el => el) // b/c some may have been deleted
+      .forEach(pushCellAndUniqueVal);
   }
 
   if (cellAndUniqueValPairs.length > 0) {
