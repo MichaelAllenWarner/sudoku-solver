@@ -5,35 +5,21 @@ function addValsToTakenNums(cellObjArray, groupObjArray) {
 
   for (const cellObj of cellObjArray) {
 
-    // move to next cell if this one has no value
-    if (!cellObj.val) {
+    // skip cell if it has no value or is already 'accounted for'
+    if (!cellObj.val || cellObj.isAccountedForInGroupTakenNums) {
       continue;
-    }
-
-    // move to next cell if this is already 'accounted for'
-    if (cellObj.isAccountedForInGroupTakenNums) {
-      continue;
-    }
-
-    // get 3 containing groups (faster than filter method b/c stops at 3)
-    const containingGroups = [];
-
-    for (const groupObj of groupObjArray) {
-      if (cellObj[groupObj.groupType]() === groupObj.num) {
-        containingGroups.push(groupObj);
-        if (containingGroups.length === 3) {
-          break;
-        }
-      }
-    }
-
-    // push all 3 group / cell-value pairs to groupAndCellValPairs
-    for (const groupObj of containingGroups) {
-      groupAndCellValPairs.push([groupObj, cellObj.val]);
     }
 
     // mark cellObj 'accounted for'
     cellObj.isAccountedForInGroupTakenNums = true;
+
+    const groupContainsCell = groupObj => cellObj[groupObj.groupType]() === groupObj.num;
+    const pushGroupAndVal = groupObj => {
+      groupAndCellValPairs.push([groupObj, cellObj.val]);
+    };
+
+    // get 3 containing groups, push each [groupObj, cellObj.val] to groupAndCellValPairs
+    groupObjArray.filter(groupContainsCell).forEach(pushGroupAndVal);
   }
 
   if (groupAndCellValPairs.length > 0) {
@@ -49,34 +35,24 @@ function removeTakenNumsFromPossVals(cellObjArray, groupObjArray) {
 
   for (const cellObj of cellObjArray) {
 
-    // move to next cell if this one has a value
     if (cellObj.val) {
       continue;
     }
 
-    // get containing groups w/ takenNums (0-3 total)
-    const qualContainingGroups = [];
+    const groupContainsCellAndHasTakenNums = groupObj =>
+      cellObj[groupObj.groupType]() === groupObj.num
+      && groupObj.takenNums.length > 0;
 
-    for (const groupObj of groupObjArray) {
-      if (cellObj[groupObj.groupType]() === groupObj.num
-        && groupObj.takenNums.length > 0) {
-        qualContainingGroups.push(groupObj);
-        if (qualContainingGroups.length === 3) {
-          break;
+    const pushCellAndTakenNums = groupObj => {
+      for (const takenNum of groupObj.takenNums) {
+        if (cellObj.possVals.includes(takenNum)) {
+          cellAndTakenNumPairs.push([cellObj, takenNum]);
         }
       }
-    }
+    };
 
-    // push cell/takenNum pairs to cellAndTakenNumPairs
-    if (qualContainingGroups.length > 0) {
-      for (const groupObj of qualContainingGroups) {
-        for (const takenNum of groupObj.takenNums) {
-          if (cellObj.possVals.includes(takenNum)) {
-            cellAndTakenNumPairs.push([cellObj, takenNum]);
-          }
-        }
-      }
-    }
+    // get containing groups w/ takenNums, push each [cellObj, takenNum] to cellAndTakenNumPairs
+    groupObjArray.filter(groupContainsCellAndHasTakenNums).forEach(pushCellAndTakenNums);
   }
 
   if (cellAndTakenNumPairs.length > 0) {
@@ -95,9 +71,14 @@ function makeUniquePossValsCellVals(cellObjArray, groupObjArray) {
 
   for (const groupObj of groupObjArray) {
 
+    const cellsInThisGroup = [];
+
+    // this will be an array of possVals that appear only once in this group:
+    let uniqueVals;
+
+    // we'll use these 2 'working' arrays to determine which possVals are unique:
     const candidateUniqueVals = [];
     const ruledOutVals = [];
-    const cellsInThisGroup = [];
 
     for (const cellObj of cellObjArray) {
 
@@ -133,9 +114,10 @@ function makeUniquePossValsCellVals(cellObjArray, groupObjArray) {
     }
 
     // candidateUniqueVals are all now actually unique
+    uniqueVals = candidateUniqueVals;
 
-    // push cellObj / unique-val pairs to cellAndUniqueValPairs
-    for (const uniqueVal of candidateUniqueVals) {
+    // push each [cellWithUniqueVal, uniqueVal] to cellAndUniqueValPairs
+    for (const uniqueVal of uniqueVals) {
 
       const cellWithUniqueVal = cellsInThisGroup.find(cellObj =>
         cellObj.possVals.includes(uniqueVal));
