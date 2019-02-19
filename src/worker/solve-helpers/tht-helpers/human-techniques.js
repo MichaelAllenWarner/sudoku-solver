@@ -55,7 +55,7 @@ function removeTakenNumsFromPossVals(cellObjArray, groupObjArray) {
   }
 
   for (const [cellObj, number] of cellAndTakenNumPairs) {
-    const index = cellObj.possVals.findIndex(possVal => possVal === number);
+    const index = cellObj.possVals.indexOf(number);
     if (index !== -1) { // in case of duplicates in cellAndTakenNumPairs
       cellObj.possVals.splice(index, 1);
     }
@@ -89,7 +89,7 @@ function makeUniquePossValsCellVals(cellObjArray, groupObjArray) {
           continue;
         }
 
-        const possValIndex = candidateUniqueVals.findIndex(val => val === possVal);
+        const possValIndex = candidateUniqueVals.indexOf(possVal);
 
         // if possVal isn't yet in candidateUniqueVals, push it there
         if (possValIndex === -1) {
