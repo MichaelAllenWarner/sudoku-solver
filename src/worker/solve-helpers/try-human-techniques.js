@@ -6,18 +6,19 @@ import {
 
 export default (cellObjArray, groupObjArray) => {
 
-  let anyChangesMade;
+  let changesWereMade;
 
   do {
-    anyChangesMade =
-      addValsToTakenNums(cellObjArray, groupObjArray)
-      || removeTakenNumsFromPossVals(cellObjArray, groupObjArray)
-      || makeUniquePossValsCellVals(cellObjArray, groupObjArray);
+    const valsWereAdded = addValsToTakenNums(cellObjArray, groupObjArray);
+    const takenNumsWereRemoved = removeTakenNumsFromPossVals(cellObjArray, groupObjArray);
+    const uniquesWereMadeVals = makeUniquePossValsCellVals(cellObjArray, groupObjArray);
 
-    if (anyChangesMade) {
+    changesWereMade = valsWereAdded || takenNumsWereRemoved || uniquesWereMadeVals;
+
+    if (changesWereMade) {
       for (const cellObj of cellObjArray) {
         cellObj.moveLastRemainingPossValToVal();
       }
     }
-  } while (anyChangesMade);
+  } while (changesWereMade);
 };

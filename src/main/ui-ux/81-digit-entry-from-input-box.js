@@ -3,8 +3,9 @@ import fillBoardFromString from '../utils/fill-board-from-string';
 
 export default () => {
   const stringEntryBox = document.querySelector('#stringEntry');
+  stringEntryBox.addEventListener('focus', function() { this.select(); });
   stringEntryBox.addEventListener('input', handleInput);
-  stringEntryBox.addEventListener('keyup', handleKeyup);
+  stringEntryBox.addEventListener('keydown', handleKeydown);
 
   function handleInput() {
 
@@ -27,7 +28,7 @@ export default () => {
     }
   }
 
-  function handleKeyup(event) {
+  function handleKeydown(event) {
     if (event.key === 'Enter') {
       const submit = document.querySelector('#submit');
       submit.click();

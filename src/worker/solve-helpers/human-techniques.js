@@ -25,7 +25,7 @@ function addValsToTakenNums(cellObjArray, groupObjArray) {
     groupObj.takenNums.push(val);
   }
 
-  return (groupAndCellValPairs.length > 0) ? true : false;
+  return (groupAndCellValPairs.length > 0);
 }
 
 function removeTakenNumsFromPossVals(cellObjArray, groupObjArray) {
@@ -61,7 +61,7 @@ function removeTakenNumsFromPossVals(cellObjArray, groupObjArray) {
     }
   }
 
-  return (cellAndTakenNumPairs.length > 0) ? true : false;
+  return (cellAndTakenNumPairs.length > 0);
 }
 
 function makeUniquePossValsCellVals(cellObjArray, groupObjArray) {
@@ -91,13 +91,9 @@ function makeUniquePossValsCellVals(cellObjArray, groupObjArray) {
 
         const possValIndex = candidateUniqueVals.indexOf(possVal);
 
-        // if possVal isn't yet in candidateUniqueVals, push it there
         if (possValIndex === -1) {
           candidateUniqueVals.push(possVal);
-        }
-
-        // if possVal IS already in candidateUniqueVals, splice it and rule it out
-        else {
+        } else {
           candidateUniqueVals.splice(possValIndex, 1);
           ruledOutVals.push(possVal);
         }
@@ -116,5 +112,5 @@ function makeUniquePossValsCellVals(cellObjArray, groupObjArray) {
     cellObj.possVals = [uniqueVal];
   }
 
-  return (cellAndUniqueValPairs.length > 0) ? true : false;
+  return (cellAndUniqueValPairs.length > 0);
 }

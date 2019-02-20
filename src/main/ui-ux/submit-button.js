@@ -27,7 +27,6 @@ export default solveWorker => {
     const solutionBox = document.querySelector('#solution');
     solutionBox.value = 'Loading...';
 
-    // solve!
     solveWorker.postMessage(boardString);
   }
 };

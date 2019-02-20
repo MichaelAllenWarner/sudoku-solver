@@ -1,8 +1,10 @@
 import setUpBoard from './board.js';
 
 export default () => {
+  const clear = document.querySelector('#clear');
+  clear.addEventListener('click', handleClick);
 
-  const handleClick = () => {
+  function handleClick() {
     const board = document.querySelector('table');
     while (board.firstChild) {
       board.removeChild(board.firstChild);
@@ -22,8 +24,5 @@ export default () => {
 
     const permalink = document.querySelector('#permalink');
     permalink.setAttribute('disabled', '');
-  };
-
-  const clear = document.querySelector('#clear');
-  clear.addEventListener('click', handleClick);
+  }
 };

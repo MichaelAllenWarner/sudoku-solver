@@ -1,6 +1,7 @@
 import {
   generateCellInputHandler,
-  generateCellKeydownHandler
+  generateCellKeydownHandler,
+  generateCellKeyupHandler
 } from '../utils/cell-event-handlers';
 
 
@@ -33,9 +34,13 @@ export default () => {
 
       const handleInput = generateCellInputHandler(i, j);
       const handleKeydown = generateCellKeydownHandler(i, j);
+      const handleKeyup = generateCellKeyupHandler(i, j);
 
       inputBox.addEventListener('input', handleInput);
       inputBox.addEventListener('keydown', handleKeydown);
+      inputBox.addEventListener('keyup', handleKeyup);
+      inputBox.addEventListener('focus', function() { this.select(); });
+
 
       currCell.appendChild(inputBox);
     }
