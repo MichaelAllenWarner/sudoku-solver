@@ -5,12 +5,7 @@ export default class Group {
     this.takenNums = [];
   }
   checkForDuplicates() { // indicates a contradiction / invalid board
-    const nonDuplicates = [];
-    for (const num of this.takenNums) {
-      if (nonDuplicates.includes(num)) {
-        return true;
-      }
-      nonDuplicates.push(num);
-    }
+    const numIsDuplicated = (num, ind, arr) => arr.indexOf(num) !== arr.lastIndexOf(num);
+    return this.takenNums.some(numIsDuplicated);
   }
 }

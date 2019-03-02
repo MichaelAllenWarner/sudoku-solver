@@ -21,8 +21,6 @@ export default class Cell {
     }
   }
   checkForNoPossValsLeft() { // indicates a contradiction / invalid board
-    if (!this.val && this.possVals.length === 0) {
-      return true;
-    }
+    return !this.val && this.possVals.length === 0;
   }
 }
