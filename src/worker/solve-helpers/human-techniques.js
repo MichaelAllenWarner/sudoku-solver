@@ -95,7 +95,7 @@ function makeUniquePossValsCellVals(cellObjArray, groupObjArray) {
 
       const cellWithUniquePossVal = cellsInGroup.find(cellObj => cellObj.possVals.includes(val));
 
-      cellAndUniqueValPairs.push([cellWithUniquePossVal, val])
+      cellAndUniqueValPairs.push([cellWithUniquePossVal, val]);
     }
   }
 
