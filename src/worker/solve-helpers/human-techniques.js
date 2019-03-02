@@ -70,10 +70,7 @@ function makeUniquePossValsCellVals(cellObjArray, groupObjArray) {
   for (const groupObj of groupObjArray) {
 
     const cellsInGroup = [];
-
-    // we'll use these 2 'working' arrays to determine which possVals are unique:
-    const candidateUniqueVals = [];
-    const ruledOutVals = [];
+    const possValsInGroup = [];
 
     for (const cellObj of cellObjArray) {
 
@@ -84,32 +81,26 @@ function makeUniquePossValsCellVals(cellObjArray, groupObjArray) {
       cellsInGroup.push(cellObj);
 
       for (const possVal of cellObj.possVals) {
-
-        if (ruledOutVals.includes(possVal)) {
-          continue;
-        }
-
-        const possValIndex = candidateUniqueVals.indexOf(possVal);
-
-        if (possValIndex === -1) {
-          candidateUniqueVals.push(possVal);
-        } else {
-          candidateUniqueVals.splice(possValIndex, 1);
-          ruledOutVals.push(possVal);
-        }
+        possValsInGroup.push(possVal);
       }
     }
 
-    const uniqueVals = candidateUniqueVals;
+    for (const val of possValsInGroup) {
 
-    for (const uniqueVal of uniqueVals) {
-      const cellWithUV = cellsInGroup.find(cellObj => cellObj.possVals.includes(uniqueVal));
-      cellAndUniqueValPairs.push([cellWithUV, uniqueVal]);
+      const valIsUnique = possValsInGroup.indexOf(val) === possValsInGroup.lastIndexOf(val);
+
+      if (!valIsUnique) {
+        continue;
+      }
+
+      const cellWithUniquePossVal = cellsInGroup.find(cellObj => cellObj.possVals.includes(val));
+
+      cellAndUniqueValPairs.push([cellWithUniquePossVal, val])
     }
   }
 
-  for (const [cellObj, uniqueVal] of cellAndUniqueValPairs) {
-    cellObj.possVals = [uniqueVal];
+  for (const [cellObj, uniquePossVal] of cellAndUniqueValPairs) {
+    cellObj.possVals = [uniquePossVal];
   }
 
   return (cellAndUniqueValPairs.length > 0);
