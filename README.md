@@ -1,4 +1,4 @@
-## Mike's Sudoku Solver
+# Mike's Sudoku Solver
 
 This single-page web app is [hosted on Heroku](https://mikes-sudoku-solver.herokuapp.com). It's my first Node/Express project, and it's written in vanilla Javascript (ES6+), HTML, and CSS.
 
