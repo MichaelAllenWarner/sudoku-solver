@@ -18,6 +18,7 @@ module.exports = [
               presets: [
                 ['@babel/preset-env', {
                   useBuiltIns: 'usage',
+                  corejs: 3,
                   debug: true,
                   targets: {
                     browsers: ['IE >= 10']
@@ -48,6 +49,7 @@ module.exports = [
                 ['@babel/preset-env', {
                   useBuiltIns: 'usage',
                   debug: true,
+                  corejs: 3,
                   targets: {
                     browsers: ['IE >= 10']
                   }
